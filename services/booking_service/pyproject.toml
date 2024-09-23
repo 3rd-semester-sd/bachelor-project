@@ -12,3 +12,7 @@ dependencies = [
     "ruff>=0.6.7",
     "uvicorn>=0.30.6",
 ]
+
+[tool.mypy]
+exclude = ["__init__.py"]
+

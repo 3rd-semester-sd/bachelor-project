@@ -21,9 +21,11 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(
-        "application:get_application",
+        "__init__:get_application",
         host=settings.host,
         port=settings.port,
         log_level=settings.log_level,
+        lifespan="on",
         reload=True,
+        factory=True,
     )

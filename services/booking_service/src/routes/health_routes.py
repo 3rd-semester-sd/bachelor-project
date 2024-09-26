@@ -5,6 +5,6 @@ router = APIRouter()
 
 
 @router.get("/health")
-async def health() -> bool:
+async def health_check() -> bool:
     """Return True if the service is healthy."""
     return True

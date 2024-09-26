@@ -1,8 +1,9 @@
+from settings import settings
+
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from fastapi import FastAPI
 from routes import base_router
-from settings import settings
 
 
 @asynccontextmanager

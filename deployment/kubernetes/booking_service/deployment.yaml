@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking-service
+  labels:
+    app: booking-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: booking-service
+  template:
+    metadata:
+      labels:
+        app: booking-service
+    spec:
+      containers:
+        - name: booking-service
+          image: booking-service-image
+          ports:
+            - containerPort: 8000
+      livenessProbe:
+        httpGet:
+          path: /health
+          port: 8000
+        initialDelaySeconds: 5
+        periodSeconds: 5
+      env:
+        - name: BOOKING_SERVICE_HOST
+          value: 0.0.0.0
+        - name: BOOKING_SERVICE_PORT
+          value: 8000
+        - name: BOOKING_SERVICE_WORKERS
+          value: 1
+        - name: BOOKING_SERVICE_LOG_LEVEL
+          value: "info"
+        

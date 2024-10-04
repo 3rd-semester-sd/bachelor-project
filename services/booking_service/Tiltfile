@@ -1,3 +1,11 @@
-docker_build("demo-python-image2", ".", dockerfile="./Dockerfile")
-k8s_yaml("./kubernetes.yaml")
-k8s_resource("demo-python2", port_forwards=8002)
+docker_build("booking-service-image", ".", dockerfile="./Dockerfile")
+
+k8s_yaml(
+    [
+        "../../deployment/kubernetes/booking_service/deployment.yaml",
+        "../../deployment/kubernetes/booking_service/service.yaml",
+    ]
+)
+# k8s_yaml("../../deployment/kubernetes/booking_service/service.yaml")
+
+k8s_resource("booking-service", port_forwards=8000)

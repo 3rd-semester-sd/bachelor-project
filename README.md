@@ -9,3 +9,8 @@
    ```bash
    tilt up
    ```
+
+3. Delete the Kubernetes objects:
+   ```bash
+   tilt down
+   ```

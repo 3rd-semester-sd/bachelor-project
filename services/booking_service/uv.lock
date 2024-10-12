@@ -28,7 +28,7 @@ wheels = [
 ]
 
 [[package]]
-name = "booking-service"
+name = "booking-svc"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

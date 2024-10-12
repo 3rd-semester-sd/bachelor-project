@@ -1,0 +1,24 @@
+load('ext://helm_remote', 'helm_remote')
+helm_remote(
+    "ingress",
+    repo_name="kong",
+    repo_url="https://charts.konghq.com",
+    allow_duplicates=True,
+)
+
+gateway_api_yaml = local(
+    "curl -sL https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/standard-install.yaml",
+    quiet=True,
+)
+
+k8s_yaml(gateway_api_yaml)
+
+# kong ingress manifests just sends commands to the ingress-gateway,
+# so these won't show up in the tilt ui
+k8s_yaml(
+    [
+        "./gateway_class.yaml",
+        "./gateway.yaml",
+        "./http_route.yaml",
+    ]
+)

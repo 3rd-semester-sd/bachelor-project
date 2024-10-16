@@ -1,4 +1,4 @@
-docker_build("booking-svc-image", ".", dockerfile="./Dockerfile")
+docker_build("booking-service-image", ".", dockerfile="./Dockerfile")
 
 k8s_yaml(
     [
@@ -7,4 +7,4 @@ k8s_yaml(
     ]
 )
 
-k8s_resource("booking-svc", port_forwards=8000)
+k8s_resource("booking-depl", port_forwards=8010)

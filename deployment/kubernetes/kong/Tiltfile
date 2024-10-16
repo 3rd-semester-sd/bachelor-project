@@ -1,14 +1,20 @@
-load('ext://helm_remote', 'helm_remote')
-helm_remote(
-    "ingress",
-    repo_name="kong",
-    repo_url="https://charts.konghq.com",
-    allow_duplicates=True,
+load("ext://helm_resource", "helm_resource", "helm_repo")
+
+helm_repo(
+    name="kong", 
+    url="https://charts.konghq.com"
+)
+helm_resource(
+    name="kong-ingress", 
+    chart="kong/ingress", 
+    flags=["--values=./values.yaml"],
 )
 
+# install gateway api CRDs
 gateway_api_yaml = local(
-    "curl -sL https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/standard-install.yaml",
+    command="curl -sL https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/standard-install.yaml",
     quiet=True,
+    echo_off=True,
 )
 
 k8s_yaml(gateway_api_yaml)

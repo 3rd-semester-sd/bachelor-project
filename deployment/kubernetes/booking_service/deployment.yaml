@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: booking-svc
+  name: booking-depl
   labels:
-    app: booking-svc
+    app: booking-depl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: booking-svc
+      app: booking-depl
   template:
     metadata:
       labels:
-        app: booking-svc
+        app: booking-depl
     spec:
       containers:
-        - name: booking-svc
-          image: booking-svc-image
+        - name: booking-depl
+          image: booking-service-image
           ports:
             - containerPort: 8000
       livenessProbe:
@@ -27,7 +27,7 @@ spec:
         periodSeconds: 5
       env:
         - name: BOOKING_SERVICE_HOST
-          value: booking_svc
+          value: booking-svc
         - name: BOOKING_SERVICE_PORT
           value: "8000"
         - name: BOOKING_SERVICE_WORKERS

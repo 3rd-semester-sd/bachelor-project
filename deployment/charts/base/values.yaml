@@ -1,0 +1,17 @@
+app_name: example-service
+namespace: default
+image: example-service-image
+container_port: 8000
+env:
+  example_service_host: "example-service"
+  example_service_log_level: "info"
+  example_service_reload: "true"
+  example_service_svc_port: "8000"
+  example_service_workers: "1"
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "500m"
+  limits:
+    memory: "256Mi"
+    cpu: "1"

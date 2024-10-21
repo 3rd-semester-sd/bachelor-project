@@ -1,9 +1,11 @@
-docker_build("booking-service-image", ".", dockerfile="./Dockerfile")
+docker_build("booking-image", ".", dockerfile="./Dockerfile")
 
 yaml = helm(
-  "../../deployment/charts/base",
-  name="booking-service-release",
-  values=["../../deployment/kubernetes/booking_service/booking.values.local.yaml"],
+    "../../deployment/charts/base",
+    name="booking-release",
+    values=["../../deployment/kubernetes/booking_service/values.yaml"],
 )
 k8s_yaml(yaml)
 
+
+k8s_resource("booking", port_forwards=8000)

@@ -29,7 +29,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "__init__:get_application",
         host=settings.host,
-        port=settings.svc_port,
+        port=settings.port,
         log_level=settings.log_level,
         reload=settings.reload,
         lifespan="on",

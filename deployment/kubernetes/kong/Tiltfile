@@ -1,12 +1,9 @@
 load("ext://helm_resource", "helm_resource", "helm_repo")
 
-helm_repo(
-    name="kong", 
-    url="https://charts.konghq.com"
-)
+helm_repo(name="kong", url="https://charts.konghq.com")
 helm_resource(
-    name="kong-ingress", 
-    chart="kong/ingress", 
+    name="kong-ingress",
+    chart="kong/ingress",
     flags=["--values=./values.yaml"],
 )
 
@@ -27,4 +24,10 @@ k8s_yaml(
         "./gateway.yaml",
         "./http_route.yaml",
     ]
+)
+
+# kubectl port-forward service/kong-ingress-gateway-proxy 8080:80
+local_resource(
+    "kong-pf",
+    serve_cmd="kubectl port-forward service/kong-ingress-gateway-proxy 8080:80",
 )

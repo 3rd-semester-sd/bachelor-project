@@ -14,6 +14,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 def get_application() -> FastAPI:
 
+    print(
+        settings.model_dump_json(indent=2),
+    )
+
     app = FastAPI(lifespan=lifespan)
     app.include_router(base_router)
     return app
@@ -27,7 +31,7 @@ if __name__ == "__main__":
         host=settings.host,
         port=settings.port,
         log_level=settings.log_level,
+        reload=settings.reload,
         lifespan="on",
-        reload=True,
         factory=True,
     )

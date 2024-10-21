@@ -13,7 +13,7 @@ spec:
         type: PathPrefix
         value: /booking-service
     backendRefs:
-    - name: booking-svc
+    - name: booking
       kind: Service
       port: 80
 

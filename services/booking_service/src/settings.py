@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     port: int = 8000
     workers: int = 1
     log_level: str = "info"
+    reload: bool = False
 
     model_config = SettingsConfigDict(
         env_file=DOTENV,

@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app_name }}
+  labels:
+    app: {{ .Values.app_name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.app_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app_name }}
+    spec:
+      containers:
+        - name: {{ .Values.app_name }}
+          image: {{ .Values.image }}
+          ports:
+            - containerPort: {{ .Values.container_port }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.container_port }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          
+          resources:
+            requests:
+              memory: {{ .Values.resources.requests.memory }}
+              cpu: {{ .Values.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.resources.limits.memory }}
+              cpu: {{ .Values.resources.limits.cpu }}
+          env:
+            {{ range $key, $value := .Values.env }}
+            - name: {{ $key | upper }}
+              value: {{ $value | quote }}
+            {{ end }}

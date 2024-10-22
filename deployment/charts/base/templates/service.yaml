@@ -10,6 +10,6 @@ spec:
     - name: http
       protocol: TCP
       port: 80
-      targetPort: 8000
+      targetPort: {{ .Values.container_port }}
   selector:
     app: {{ .Values.app_name }}

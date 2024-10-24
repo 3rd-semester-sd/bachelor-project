@@ -23,6 +23,7 @@ k8s_yaml(
         "./gateway_class.yaml",
         "./gateway.yaml",
         "./http_route.yaml",
+        "./rl_plugin.yaml",
     ]
 )
 

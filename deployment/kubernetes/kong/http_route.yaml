@@ -4,6 +4,7 @@ metadata:
   name: http-route
   annotations:
     konghq.com/strip-path: "true"
+    konghq.com/plugins: rate-limit
 spec:
   parentRefs:
   - name: kong

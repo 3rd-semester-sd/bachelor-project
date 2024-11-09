@@ -1,12 +1,16 @@
 {
   "extends": "fastify-tsconfig",
   "compilerOptions": {
-    "outDir": "dist",
-    "sourceMap": true,
-    "moduleResolution": "NodeNext",
-    "module": "NodeNext",
     "target": "ES2022",
+    "outDir": "dist",
+    "baseUrl": "./",  // Set base directory for module resolution
+    "paths": {
+      "~/*": ["./src/*"]  // Add path aliases if necessary
+    },
+    "moduleResolution": "NodeNext",  // Use Node's ESM resolution
+    "module": "NodeNext",  // Match Node.js ESM style
+    "sourceMap": true,
     "esModuleInterop": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"]  // Ensure all TypeScript files are included
 }

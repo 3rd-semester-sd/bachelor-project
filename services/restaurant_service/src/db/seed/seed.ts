@@ -1,23 +1,21 @@
-import 'dotenv/config';
-import { eq } from 'drizzle-orm';
-import * as schema from "../../db/schema.js"
-import { db } from "~/db/index.js"
-
-
+import "dotenv/config";
+import { eq } from "drizzle-orm";
+import * as schema from "~/db/schema.js";
+import { db } from "~/db/index.js";
 
 async function main() {
-    const user: typeof schema.usersTable.$inferInsert = {
-        name: 'John',
-        age: 30,
-        email: 'john@example.com',
-    };
+  const user: typeof schema.usersTable.$inferInsert = {
+    name: "John",
+    age: 30,
+    email: "john@example.com",
+  };
 
-    await db.insert(schema.usersTable).values(user);
-    console.log('New user created!')
+  await db.insert(schema.usersTable).values(user);
+  console.log("New user created!");
 
-    const users = await db.select().from(schema.usersTable);
-    console.log('Getting all users from the database: ', users)
-    /*
+  const users = await db.select().from(schema.usersTable);
+  console.log("Getting all users from the database: ", users);
+  /*
     const users: {
       id: number;
       name: string;
@@ -26,16 +24,16 @@ async function main() {
     }[]
     */
 
-    await db
-        .update(schema.usersTable)
-        .set({
-            age: 31,
-        })
-        .where(eq(schema.usersTable.email, user.email));
-    console.log('User info updated!')
+  await db
+    .update(schema.usersTable)
+    .set({
+      age: 31,
+    })
+    .where(eq(schema.usersTable.email, user.email));
+  console.log("User info updated!");
 
-    // await db.delete(schema.usersTable).where(eq(schema.usersTable.email, user.email));
-    // console.log('User deleted!')
+  // await db.delete(schema.usersTable).where(eq(schema.usersTable.email, user.email));
+  // console.log('User deleted!')
 }
 
 main();

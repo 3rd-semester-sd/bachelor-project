@@ -1,11 +1,18 @@
 import { pgEnum } from "drizzle-orm/pg-core";
 
 export enum CuisineType {
-  ITALIAN = "Italian",
-  JAPANESE = "Japanese",
-  MEXICAN = "Mexican",
-  INDIAN = "Indian",
-  FRENCH = "French",
+  ITALIAN = "italian",
+  JAPANESE = "japanese",
+  MEXICAN = "mexican",
+  INDIAN = "indian",
+  FRENCH = "french",
+}
+
+export enum MenuCategory {
+  APPETIZER = "Appetizer",
+  MAIN_DISH = "Main Dish",
+  SIDES = "Sides",
+  DESSERTS = "Desserts",
 }
 
 export function enumToPgEnum<T extends Record<string, any>>(
@@ -14,7 +21,12 @@ export function enumToPgEnum<T extends Record<string, any>>(
   return Object.values(myEnum).map((value: any) => `${value}`) as any;
 }
 
-export const cuisineTypeEnum = pgEnum(
+export const cuisineTypePgEnum = pgEnum(
+  "cuisineTypeEnum",
+  enumToPgEnum(CuisineType)
+);
+
+export const menuCategoryPgEnum = pgEnum(
   "cuisineTypeEnum",
   enumToPgEnum(CuisineType)
 );

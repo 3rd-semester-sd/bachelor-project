@@ -20,13 +20,3 @@ export function enumToPgEnum<T extends Record<string, any>>(
 ): [T[keyof T], ...T[keyof T][]] {
   return Object.values(myEnum).map((value: any) => `${value}`) as any;
 }
-
-export const cuisineTypePgEnum = pgEnum(
-  "cuisineTypeEnum",
-  enumToPgEnum(CuisineType)
-);
-
-export const menuCategoryPgEnum = pgEnum(
-  "cuisineTypeEnum",
-  enumToPgEnum(CuisineType)
-);

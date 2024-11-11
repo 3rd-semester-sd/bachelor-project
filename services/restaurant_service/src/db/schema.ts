@@ -6,23 +6,9 @@ import {
   numeric,
   index,
   uniqueIndex,
-  pgEnum
+  pgEnum,
 } from "drizzle-orm/pg-core";
-// import { cuisineTypePgEnum, menuCategoryPgEnum, CuisineType, MenuCategory } from "~/db/enums.ts";
-export enum CuisineType {
-  ITALIAN = "italian",
-  JAPANESE = "japanese",
-  MEXICAN = "mexican",
-  INDIAN = "indian",
-  FRENCH = "french",
-}
-
-export enum MenuCategory {
-  APPETIZER = "appetizer",
-  MAIN_DISH = "main_dish",
-  SIDES = "sides",
-  DESSERTS = "desserts",
-}
+import { CuisineType, MenuCategory } from "~/db/enums";
 
 export function enumToPgEnum<T extends Record<string, any>>(
   myEnum: T

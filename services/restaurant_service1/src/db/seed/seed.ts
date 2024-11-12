@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { eq } from "drizzle-orm";
-import * as schema from "~/db/schema.js";
-import { db } from "~/db/index.js";
+import * as schema from "~/db/schema";
+import { db } from "~/db/index";
 
 async function main() {
   const user: typeof schema.usersTable.$inferInsert = {

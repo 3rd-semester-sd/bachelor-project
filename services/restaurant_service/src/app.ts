@@ -1,46 +1,32 @@
-import * as path from "path";
-import AutoLoad, {AutoloadPluginOptions} from "@fastify/autoload";
-import { FastifyPluginAsync } from "fastify";
-import { fileURLToPath } from "url";
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUI from "@fastify/swagger-ui";
+import Fastify from "fastify";
+import {
+  jsonSchemaTransform,
+  serializerCompiler,
+  validatorCompiler,
+  ZodTypeProvider,
+} from "fastify-type-provider-zod";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const fastify = Fastify();
 
-export type AppOptions = {
-  // Place your custom options for app below here.
-} & Partial<AutoloadPluginOptions>;
+fastify.register(fastifySwagger, {
+  openapi: {
+    info: {
+      title: "Restaurant API",
+      description: "Restaurant API",
+      version: "0.0.1",
+    },
+    servers: [],
+  },
+  transform: jsonSchemaTransform,
+});
 
+fastify.register(fastifySwaggerUI, {
+  routePrefix: "/docs",
+});
 
-// Pass --options via CLI arguments in command to enable these options.
-const options: AppOptions = {
-};
+fastify.setValidatorCompiler(validatorCompiler);
+fastify.setSerializerCompiler(serializerCompiler);
 
-const app: FastifyPluginAsync<AppOptions> = async (
-  fastify,
-  opts
-): Promise<void> => {
-  // Place here your custom code!
-
-  // Do not touch the following lines
-
-  // This loads all plugins defined in plugins
-  // those should be support plugins that are reused
-  // through your application
-  void fastify.register(AutoLoad, {
-    dir: path.join(__dirname, "plugins"),
-    options: opts,
-    forceESM: true
-  });
-
-  // This loads all plugins defined in routes
-  // define your routes in one of these
-  void fastify.register(AutoLoad, {
-    dir: path.join(__dirname, "routes"),
-    options: opts,
-    forceESM: true
-  });
-
-};
-
-export default app;
-export { app, options };
+export const app = fastify.withTypeProvider<ZodTypeProvider>();

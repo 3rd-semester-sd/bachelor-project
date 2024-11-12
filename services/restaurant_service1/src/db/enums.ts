@@ -1,5 +1,3 @@
-import { pgEnum } from "drizzle-orm/pg-core";
-
 export enum CuisineType {
   ITALIAN = "italian",
   JAPANESE = "japanese",

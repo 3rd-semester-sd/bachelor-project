@@ -1,6 +1,8 @@
 import "dotenv/config";
+import { join } from "path";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUI from "@fastify/swagger-ui";
+import fastifyStatic from "@fastify/static";
 import Fastify from "fastify";
 import {
   jsonSchemaTransform,
@@ -8,6 +10,7 @@ import {
   validatorCompiler,
   ZodTypeProvider,
 } from "fastify-type-provider-zod";
+import AutoLoad from "@fastify/autoload";
 
 const fastify = Fastify({
   logger:
@@ -15,10 +18,10 @@ const fastify = Fastify({
       ? {
           level: "info",
           transport: {
-            target: "pino-pretty", // optional, if you want human-readable logs in development
+            target: "pino-pretty", // human-readable logs in development
           },
         }
-      : true,
+      : true, // default logs for prod
   bodyLimit: 1024 * 1024 * 1024,
 });
 
@@ -40,5 +43,16 @@ fastify.register(fastifySwaggerUI, {
 
 fastify.setValidatorCompiler(validatorCompiler);
 fastify.setSerializerCompiler(serializerCompiler);
+
+// This loads all plugins defined in plugins
+void fastify.register(AutoLoad, {
+  dir: join(__dirname, "plugins"),
+});
+
+// This loads all plugins defined in routes
+// define your routes in one of these
+void fastify.register(AutoLoad, {
+  dir: join(__dirname, "routes"),
+});
 
 export const app = fastify.withTypeProvider<ZodTypeProvider>();

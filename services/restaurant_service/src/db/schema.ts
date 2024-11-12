@@ -36,7 +36,7 @@ export const usersTable = pgTable(
   },
   (t) => [index("name_idx").on(t.name), uniqueIndex("email_idx").on(t.email)]
 );
-export const restaurantsTable = pgTable("restaurants", {
+export const restaurantsTable = pgTable("restaurant", {
   restaurant_id: uuid().primaryKey().defaultRandom(),
   restaurant_name: varchar({ length: 255 }).notNull(),
   restaurant_address: varchar({ length: 255 }).notNull(),
@@ -56,6 +56,12 @@ export const menuItemTable = pgTable("menu_item", {
   menu_id: uuid().references(() => menuTable.menu_id),
   item_name: varchar({ length: 255 }).notNull(),
   item_description: varchar({ length: 255 }).notNull(),
+  // TODO: price behaves weird
   price: numeric({ precision: 2 }),
   category: menuCategoryPgEnum(),
 });
+
+export type User = typeof usersTable.$inferInsert;
+export type Restaurant = typeof restaurantsTable.$inferInsert;
+export type Menu = typeof menuTable.$inferInsert;
+export type MenuItem = typeof menuItemTable.$inferInsert;

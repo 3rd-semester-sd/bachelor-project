@@ -12,6 +12,7 @@ export const route: FastifyPluginAsync = async (fastify, opts) => {
     method: "GET",
     url: "/",
     schema: {
+      tags: ["Restaurant"],
       response: {
         200: responseSchema,
       },

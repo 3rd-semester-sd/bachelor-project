@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS "menu" (
 	"menu_description" varchar(255) NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "restaurants" (
+CREATE TABLE IF NOT EXISTS "restaurant" (
 	"restaurant_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"restaurant_name" varchar(255) NOT NULL,
 	"restaurant_address" varchar(255) NOT NULL,
@@ -39,7 +39,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "menu" ADD CONSTRAINT "menu_restaurant_id_restaurants_restaurant_id_fk" FOREIGN KEY ("restaurant_id") REFERENCES "public"."restaurants"("restaurant_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "menu" ADD CONSTRAINT "menu_restaurant_id_restaurant_restaurant_id_fk" FOREIGN KEY ("restaurant_id") REFERENCES "public"."restaurant"("restaurant_id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

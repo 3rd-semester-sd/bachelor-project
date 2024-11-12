@@ -7,10 +7,10 @@ export enum CuisineType {
 }
 
 export enum MenuCategory {
-  APPETIZER = "Appetizer",
-  MAIN_DISH = "Main Dish",
-  SIDES = "Sides",
-  DESSERTS = "Desserts",
+  APPETIZER = "appetizer",
+  MAIN_DISH = "main_dish",
+  SIDES = "sides",
+  DESSERTS = "desserts",
 }
 
 export function enumToPgEnum<T extends Record<string, any>>(

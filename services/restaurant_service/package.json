@@ -22,6 +22,7 @@
     "@fastify/swagger": "^9.2.0",
     "@fastify/swagger-ui": "^5.1.0",
     "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.36.1",
     "esbuild-plugin-alias": "^0.2.1",
     "esbuild-plugin-copy": "^2.1.1",
     "esbuild-plugin-pino": "^2.2.1",
@@ -30,12 +31,14 @@
     "fastify-type-provider-zod": "^4.0.2",
     "pino": "^9.5.0",
     "pino-pretty": "^13.0.0",
+    "postgres": "^3.4.5",
     "tiny-glob": "^0.2.9",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.2.0",
     "@types/node": "^22.9.0",
+    "drizzle-kit": "^0.28.0",
     "esbuild": "^0.24.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",

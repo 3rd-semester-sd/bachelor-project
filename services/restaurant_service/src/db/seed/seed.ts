@@ -1,8 +1,9 @@
 import * as schema from "~/db/schema";
 import { User, Restaurant, Menu, MenuItem } from "~/db/schema";
-import { db } from "~/db/index";
+import { getDbClient } from "~/db/db";
 import { faker } from "@faker-js/faker";
 import { CuisineType, MenuCategory } from "../enums";
+import "dotenv/config";
 
 // Generate and insert test data
 
@@ -15,6 +16,10 @@ async function main() {
   // };
   // await db.insert(schema.usersTable).values(testUser);
   // console.log("Test user created!");
+
+  const db = await getDbClient(
+    process.env.RESTAURANT_DATABASE_URL || "default_database_url"
+  );
 
   for (let index = 0; index < 10; index++) {
     const user: User = {

@@ -1,3 +1,4 @@
+import "dotenv/config";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUI from "@fastify/swagger-ui";
 import Fastify from "fastify";
@@ -8,13 +9,24 @@ import {
   ZodTypeProvider,
 } from "fastify-type-provider-zod";
 
-const fastify = Fastify();
+const fastify = Fastify({
+  logger:
+    process.env.NODE_ENV === "DEV"
+      ? {
+          level: "info",
+          transport: {
+            target: "pino-pretty", // optional, if you want human-readable logs in development
+          },
+        }
+      : true,
+  bodyLimit: 1024 * 1024 * 1024,
+});
 
 fastify.register(fastifySwagger, {
   openapi: {
     info: {
       title: "Restaurant API",
-      description: "Restaurant API",
+      description: "Resturant API",
       version: "0.0.1",
     },
     servers: [],

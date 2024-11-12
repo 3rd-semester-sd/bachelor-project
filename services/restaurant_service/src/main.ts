@@ -1,7 +1,6 @@
 import { app } from "~/app";
-import route from "./routes/restaurants";
 
-app.listen({ port: 5000 }, (err, addr) => {
+app.listen({ host: "127.0.0.1", port: 5000 }, (err, addr) => {
   if (err) {
     console.log(err);
     process.exit(1);

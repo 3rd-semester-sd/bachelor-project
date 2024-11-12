@@ -39,6 +39,23 @@ fastify.register(fastifySwagger, {
 
 fastify.register(fastifySwaggerUI, {
   routePrefix: "/docs",
+  uiConfig: {
+    docExpansion: "full",
+    deepLinking: false,
+  },
+  uiHooks: {
+    onRequest: function (request, reply, next) {
+      next();
+    },
+    preHandler: function (request, reply, next) {
+      next();
+    },
+  },
+  transformStaticCSP: (header) => header,
+  transformSpecification: (swaggerObject, request, reply) => {
+    return swaggerObject;
+  },
+  transformSpecificationClone: true,
 });
 
 fastify.setValidatorCompiler(validatorCompiler);

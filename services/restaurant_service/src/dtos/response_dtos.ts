@@ -32,7 +32,11 @@ export const DefaultCreatedResponseSchema = z.object({
 });
 
 export type DataResponse = z.infer<typeof DataResponseSchema>;
-export type DataListResponse = z.infer<typeof DataListResponseSchema>;
+type DataListResponseHelper<T extends z.ZodTypeAny> = z.infer<
+  ReturnType<typeof DataListResponseSchema<T>>
+>;
+export type DataListResponse<T extends z.ZodTypeAny> =
+  DataListResponseHelper<T>;
 export type SuccessAndMessage = z.infer<typeof SuccessAndMessageSchema>;
 export type EmptyDefaultResponse = z.infer<typeof EmptyDefaultResponseSchema>;
 export type DefaultCreatedResponse = z.infer<

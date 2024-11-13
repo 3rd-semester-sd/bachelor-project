@@ -2,7 +2,6 @@ import "dotenv/config";
 import { join } from "path";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUI from "@fastify/swagger-ui";
-import fastifyStatic from "@fastify/static";
 import Fastify from "fastify";
 import {
   jsonSchemaTransform,

@@ -6,7 +6,6 @@ import { DataListResponseSchema } from "~/dtos/response_dtos";
 import { RestaurantDTO } from "~/dtos/restaurant_dtos";
 
 export const route: BasePlugin = async (fastify, opts) => {
-  // GET /restaurant
   fastify.route({
     method: "GET",
     url: "/",

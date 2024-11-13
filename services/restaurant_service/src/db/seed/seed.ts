@@ -67,8 +67,8 @@ async function main() {
     menus.push(menuResult.menu_id);
   }
 
+  // Insert test menu items for the menu
   for (const menu of menus) {
-    // Insert test menu items for the menu
     const menuItems: MenuItem[] = Array.from({ length: 5 }).map(() => ({
       menu_id: menu,
       item_name: faker.commerce.productName(),

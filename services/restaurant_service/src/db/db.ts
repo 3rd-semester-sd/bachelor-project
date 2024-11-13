@@ -4,8 +4,8 @@ import postgres from "postgres";
 import * as schema from "~/db/schema";
 
 export function getDbClient(db_url: string) {
-  const queryClient = postgres(db_url);
-  const db = drizzle(queryClient, { schema });
+  const sql = postgres(db_url);
+  const db = drizzle(sql, { schema });
   return db;
 }
 

@@ -21,4 +21,5 @@ export const dbPlugin = fastifyPlugin<
   const db = getDbClient(databaseUrl);
   fastify.decorate("db", db);
   fastify.db = db;
+  fastify.log.info(`[dbPlugin] Initialized`);
 });

@@ -66,6 +66,7 @@ fastify.setSerializerCompiler(serializerCompiler);
 fastify.register(dbPlugin, {
   databaseUrl: process.env.RESTAURANT_DATABASE_URL!,
 });
+
 // This loads all plugins defined in routes
 // define your routes in one of these
 void fastify.register(AutoLoad, {

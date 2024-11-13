@@ -8,13 +8,7 @@ import {
   uniqueIndex,
   pgEnum,
 } from "drizzle-orm/pg-core";
-import { CuisineType, MenuCategory } from "~/db/enums";
-
-export function enumToPgEnum<T extends Record<string, any>>(
-  myEnum: T
-): [T[keyof T], ...T[keyof T][]] {
-  return Object.values(myEnum).map((value: any) => `${value}`) as any;
-}
+import { CuisineType, enumToPgEnum, MenuCategory } from "~/db/enums";
 
 export const cuisineTypePgEnum = pgEnum(
   "cuisineTypeEnum",

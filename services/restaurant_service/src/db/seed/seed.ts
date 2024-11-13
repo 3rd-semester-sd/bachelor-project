@@ -37,7 +37,7 @@ async function main() {
     restaurant_name: faker.company.name(),
     restaurant_address: faker.location.streetAddress(),
     restaurant_location: faker.location.city(),
-    cuisine_type: faker.helpers.arrayElement<CuisineType>([CuisineType.FRENCH]),
+    cuisine_type: faker.helpers.arrayElement(Object.values(CuisineType)),
   };
 
   const restaurants: string[] = [];
@@ -76,9 +76,7 @@ async function main() {
       price: faker.number
         .float({ min: 5, max: 100, fractionDigits: 2 })
         .toString(),
-      category: faker.helpers.arrayElement<MenuCategory>([
-        MenuCategory.APPETIZER,
-      ]),
+      category: faker.helpers.arrayElement(Object.values(MenuCategory)),
     }));
 
     console.log(menuItems);

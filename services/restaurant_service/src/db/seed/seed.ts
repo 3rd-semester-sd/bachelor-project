@@ -69,7 +69,6 @@ async function main() {
 
   for (const menu of menus) {
     // Insert test menu items for the menu
-    for (let index = 0; index < 10; index++) {}
     const menuItems: MenuItem[] = Array.from({ length: 5 }).map(() => ({
       menu_id: menu,
       item_name: faker.commerce.productName(),

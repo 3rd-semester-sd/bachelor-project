@@ -2,25 +2,10 @@ import path from "node:path";
 import { cp } from "node:fs/promises";
 import { build } from "esbuild";
 import type { Plugin } from "esbuild";
+import { copy } from "esbuild-plugin-copy";
 import esbuildPluginPino from "esbuild-plugin-pino";
 import glob from "tiny-glob";
 
-/** esbuild plugin to copy static folder to outdir */
-function esbuildPluginFastifySwaggerUi(): Plugin {
-  return {
-    name: "@fastify/swagger-ui",
-    setup(build) {
-      const { outdir } = build.initialOptions;
-      const fastifySwaggerUi = path.dirname(
-        require.resolve("@fastify/swagger-ui")
-      );
-      const source = path.join(fastifySwaggerUi, "static");
-      const dest = path.join(outdir, "static");
-
-      build.onEnd(async () => cp(source, dest, { recursive: true }));
-    },
-  };
-}
 
 (async function () {
   // Get all ts files
@@ -37,7 +22,13 @@ function esbuildPluginFastifySwaggerUi(): Plugin {
     sourcemap: true,
     plugins: [
       esbuildPluginPino({ transports: ["pino-pretty"] }),
-      esbuildPluginFastifySwaggerUi(),
+      copy({
+        resolveFrom: "cwd",
+        assets: {
+          from: ["node_modules/@fastify/swagger-ui/static/*"],
+          to: ["dist/static"],
+        },
+      }),
     ],
   });
 })();

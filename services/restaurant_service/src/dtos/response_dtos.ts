@@ -4,11 +4,13 @@ const UUIDSchema = z.string().uuid();
 const SuccessSchema = z.boolean().default(true);
 const MessageSchema = z.string().optional();
 
-export const DataResponseSchema = z
-  .object({
-    data: z.unknown().nullable().optional(),
-  })
-  .describe("Default response with a single data entry");
+export const DataResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
+  z.object({
+    data: itemSchema
+      .nullable()
+      .optional()
+      .describe("Default response with a single data entry"),
+  });
 
 export const DataListResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
   z
@@ -31,12 +33,31 @@ export const DefaultCreatedResponseSchema = z.object({
   message: MessageSchema.default("Created successfully!"),
 });
 
-export type DataResponse = z.infer<typeof DataResponseSchema>;
-type DataListResponseHelper<T extends z.ZodTypeAny> = z.infer<
+export type DataResponse<T extends z.ZodTypeAny> = z.infer<
+  ReturnType<typeof DataResponseSchema<T>>
+>;
+
+export type DataListResponse<T extends z.ZodTypeAny> = z.infer<
   ReturnType<typeof DataListResponseSchema<T>>
 >;
-export type DataListResponse<T extends z.ZodTypeAny> =
-  DataListResponseHelper<T>;
+
+export const PaginatedDataListResponseSchema = <T extends z.ZodTypeAny>(
+  itemSchema: T
+) =>
+  z
+    .object({
+      data: z.array(itemSchema).optional(),
+      pagination: z
+        .object({
+          totalItems: z.number(),
+          totalPages: z.number(),
+          currentPage: z.number(),
+          pageSize: z.number(),
+        })
+        .describe("Pagination metadata"),
+    })
+    .describe("Response with a list of data entries and pagination metadata");
+
 export type SuccessAndMessage = z.infer<typeof SuccessAndMessageSchema>;
 export type EmptyDefaultResponse = z.infer<typeof EmptyDefaultResponseSchema>;
 export type DefaultCreatedResponse = z.infer<

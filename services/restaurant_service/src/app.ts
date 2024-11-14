@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { join } from "path";
+import path, { join } from "path";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUI from "@fastify/swagger-ui";
 import Fastify from "fastify";
@@ -39,6 +39,11 @@ fastify.register(fastifySwagger, {
 
 fastify.register(fastifySwaggerUI, {
   routePrefix: "/docs",
+  baseDir:
+    process.env.NODE_ENV === "PROD"
+      ? path.resolve(__dirname, "static")
+      : undefined,
+
   uiConfig: {
     docExpansion: "full",
     deepLinking: false,

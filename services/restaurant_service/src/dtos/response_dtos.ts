@@ -49,10 +49,10 @@ export const PaginatedDataListResponseSchema = <T extends z.ZodTypeAny>(
       data: z.array(itemSchema).optional(),
       pagination: z
         .object({
-          totalItems: z.number(),
-          totalPages: z.number(),
-          currentPage: z.number(),
-          pageSize: z.number(),
+          total_items: z.number(),
+          total_pages: z.number(),
+          current_page: z.number(),
+          page_size: z.number(),
         })
         .describe("Pagination metadata"),
     })

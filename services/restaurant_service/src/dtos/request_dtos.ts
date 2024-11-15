@@ -6,7 +6,7 @@ export const PaginationSchema = z.object({
     .transform((val) => parseInt(val, 10))
     .default("1")
     .pipe(z.number().int().positive()),
-  pageSize: z
+  page_size: z
     .string()
     .transform((val) => parseInt(val, 10))
     .default("10")

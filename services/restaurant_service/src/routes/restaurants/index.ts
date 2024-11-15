@@ -17,7 +17,7 @@ export const route: BasePlugin = async (fastify, opts) => {
       },
     },
     handler: async (req, res) => {
-      const { page, pageSize } = req.query;
+      const { page, page_size: pageSize } = req.query;
 
       // calculate the offset
       const offset = (page - 1) * pageSize;
@@ -34,15 +34,13 @@ export const route: BasePlugin = async (fastify, opts) => {
 
       const totalPages = Math.ceil(totalItems[0].count / pageSize);
 
-      const transformedData = data.map((item) => RestaurantDTO.parse(item));
-
       return res.send({
-        data: transformedData,
+        data: data,
         pagination: {
-          totalItems: totalItems[0].count,
-          totalPages,
-          currentPage: page,
-          pageSize,
+          total_items: totalItems[0].count,
+          total_pages: totalPages,
+          current_page: page,
+          page_size: pageSize,
         },
       });
     },

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const PaginationSchema = z.object({
+export const paginationDTO = z.object({
   page: z
     .string()
     .transform((val) => parseInt(val, 10))
@@ -12,3 +12,5 @@ export const PaginationSchema = z.object({
     .default("10")
     .pipe(z.number().int().positive().max(100)),
 });
+
+export type PaginationDTO = z.infer<typeof paginationDTO>;

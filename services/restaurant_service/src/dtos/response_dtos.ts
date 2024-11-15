@@ -1,10 +1,6 @@
 import { z } from "zod";
 
-const UUIDSchema = z.string().uuid();
-const SuccessSchema = z.boolean().default(true);
-const MessageSchema = z.string().optional();
-
-export const DataResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
+export const dataResponseDTO = <T extends z.ZodTypeAny>(itemSchema: T) =>
   z.object({
     data: itemSchema
       .nullable()
@@ -12,36 +8,14 @@ export const DataResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
       .describe("Default response with a single data entry"),
   });
 
-export const DataListResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
+export const dataListResponseDTO = <T extends z.ZodTypeAny>(inputDTO: T) =>
   z
     .object({
-      data: z.array(itemSchema).optional(),
+      data: z.array(inputDTO).optional(),
     })
     .describe("Response with a list of data entries");
 
-export const SuccessAndMessageSchema = z.object({
-  success: SuccessSchema,
-  message: MessageSchema.default("Success!"),
-});
-
-export const EmptyDefaultResponseSchema = SuccessAndMessageSchema.extend({
-  data: z.null().default(null),
-}).describe("Empty response with success and message");
-
-export const DefaultCreatedResponseSchema = z.object({
-  data: z.union([UUIDSchema, z.number()]).nullable().default(null),
-  message: MessageSchema.default("Created successfully!"),
-});
-
-export type DataResponse<T extends z.ZodTypeAny> = z.infer<
-  ReturnType<typeof DataResponseSchema<T>>
->;
-
-export type DataListResponse<T extends z.ZodTypeAny> = z.infer<
-  ReturnType<typeof DataListResponseSchema<T>>
->;
-
-export const PaginatedDataListResponseSchema = <T extends z.ZodTypeAny>(
+export const paginatedDataListResponseDTO = <T extends z.ZodTypeAny>(
   itemSchema: T
 ) =>
   z
@@ -58,8 +32,20 @@ export const PaginatedDataListResponseSchema = <T extends z.ZodTypeAny>(
     })
     .describe("Response with a list of data entries and pagination metadata");
 
-export type SuccessAndMessage = z.infer<typeof SuccessAndMessageSchema>;
-export type EmptyDefaultResponse = z.infer<typeof EmptyDefaultResponseSchema>;
-export type DefaultCreatedResponse = z.infer<
-  typeof DefaultCreatedResponseSchema
+export const defaultCreatedResponseDTO = z.object({
+  data: z.union([z.string().uuid(), z.number()]).nullable().default(null),
+  message: z.string().optional().default("Created successfully!"),
+});
+
+export type DataResponseDTO<T extends z.ZodTypeAny> = z.infer<
+  ReturnType<typeof dataResponseDTO<T>>
 >;
+export type DataListResponseDTO<T extends z.ZodTypeAny> = z.infer<
+  ReturnType<typeof dataListResponseDTO<T>>
+>;
+
+export type PaginatedDataListResponseDTO<T extends z.ZodTypeAny> = z.infer<
+  ReturnType<typeof paginatedDataListResponseDTO<T>>
+>;
+
+export type DefaultCreatedResponse = z.infer<typeof defaultCreatedResponseDTO>;

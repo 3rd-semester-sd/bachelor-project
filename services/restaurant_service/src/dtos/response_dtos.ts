@@ -32,9 +32,9 @@ export const paginatedDataListResponseDTO = <T extends z.ZodTypeAny>(
     })
     .describe("Response with a list of data entries and pagination metadata");
 
-export const defaultCreatedResponseDTO = z.object({
+export const defaultResponseDTO = z.object({
   data: z.union([z.string().uuid(), z.number()]).nullable().default(null),
-  message: z.string().optional().default("Created successfully!"),
+  message: z.string().optional().default("Ok."),
 });
 
 export type DataResponseDTO<T extends z.ZodTypeAny> = z.infer<
@@ -48,4 +48,4 @@ export type PaginatedDataListResponseDTO<T extends z.ZodTypeAny> = z.infer<
   ReturnType<typeof paginatedDataListResponseDTO<T>>
 >;
 
-export type DefaultCreatedResponse = z.infer<typeof defaultCreatedResponseDTO>;
+export type DefaultCreatedResponse = z.infer<typeof defaultResponseDTO>;

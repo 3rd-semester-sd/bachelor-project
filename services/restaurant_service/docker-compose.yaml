@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  postgres:
+  db:
     image: postgres:16
     container_name: pg-restaurant-service
     environment:
@@ -12,6 +12,16 @@ services:
       - "5432:5432"
     volumes:
       - pg-restaurant-service-data:/var/lib/postgresql/data
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://restaurant:restaurant@db:5432/pg-restaurant-service
+    depends_on:
+      - db
 
 volumes:
   pg-restaurant-service-data:

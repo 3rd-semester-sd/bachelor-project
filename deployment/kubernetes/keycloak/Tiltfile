@@ -1,0 +1,13 @@
+load("ext://helm_resource", "helm_resource", "helm_repo")
+
+helm_repo(name="bitnami", url="https://charts.bitnami.com/bitnami")
+helm_resource(
+    name="keycloak",
+    chart="bitnami/keycloak",
+    flags=["--values=./values.yaml"],
+)
+
+local_resource(
+    "kc-pf",
+    serve_cmd="kubectl port-forward service/keycloak 8090:80",
+)

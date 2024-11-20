@@ -1,0 +1,21 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: rate-limit
+  annotations:
+    kubernetes.io/ingress.class: kong
+config:
+  minute: 100
+  policy: local
+plugin: rate-limiting
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: custom-keycloak-jwt
+config:
+  keycloak_introspection_url: "http://localhost:8090/realms/bachelor/protocol/openid-connect/token/introspect"
+  client_id: "introspection-client"
+  client_secret: "**********"
+plugin: custom-keycloak-jwt
+

@@ -1,0 +1,9 @@
+apiVersion: v2
+name: postgresql
+description: A PostgreSQL chart for microservices
+version: 1.0.0
+type: application
+dependencies:
+  - name: postgresql
+    version: 16.0.0
+    repository: https://charts.bitnami.com/bitnami

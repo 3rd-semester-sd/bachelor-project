@@ -1,0 +1,20 @@
+[project]
+name = "ai-service"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Moshizzl3", email = "81045658+Moshizzl3@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.5",
+    "langchain>=0.3.7",
+]
+
+[project.scripts]
+ai-service = "ai_service:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

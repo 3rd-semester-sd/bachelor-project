@@ -1,3 +1,7 @@
+local_resource(
+    name="create-custom-keycloak-jwt-configmap",
+    serve_cmd="kubectl create configmap custom-keycloak-jwt --from-file=./custom-plugins/custom-keycloak-jwt",
+)
 load("ext://helm_resource", "helm_resource", "helm_repo")
 
 helm_repo(name="kong", url="https://charts.konghq.com")
@@ -18,12 +22,14 @@ k8s_yaml(gateway_api_yaml)
 
 # kong ingress manifests just sends commands to the ingress-gateway,
 # so these won't show up in the tilt ui
+
+
 k8s_yaml(
     [
+        "./plugins.yaml",
         "./gateway_class.yaml",
         "./gateway.yaml",
         "./http_route.yaml",
-        "./rl_plugin.yaml",
     ]
 )
 

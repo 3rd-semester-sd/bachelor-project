@@ -1,0 +1,41 @@
+image:
+  registry: docker.io
+  repository: bitnami/keycloak
+  tag: 26.0.5-debian-12-r0
+
+containerPorts:
+  http: 8080
+  https: 8443
+  metrics: 9000  # disabled, men kan måske bruges med Prometheus
+
+metrics:
+  enabled: false
+
+replicaCount: 1
+
+restartPolicy: Always
+
+#ingress:
+#  enabled: true
+#  hostname: keycloak.local
+#  
+#adminIngress:
+#  enabled: true
+#  hostname: admin.keycloak.local
+
+auth:
+  adminUser: user
+  adminPassword: password
+
+postgresql:
+  enabled: true
+  auth:
+    secretKeys:
+      userPasswordKey: postgres-password
+    postgresPassword: postgres
+    username: postgres
+    password: postgres
+    database: keycloak-db
+
+autoscaling:
+  enabled: false

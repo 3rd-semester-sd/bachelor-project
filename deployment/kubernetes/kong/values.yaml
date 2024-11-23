@@ -2,9 +2,19 @@ image:
   repository: kong
   tag: "3.6"
 
+deployment:
+  kong:
+    enabled: false
+
 env:
   prefix: /kong_prefix/
   database: "off"
 
 ingressController:
   enabled: true
+
+gateway:
+  plugins:
+    configMaps:
+    - name: custom-keycloak-jwt
+      pluginName: custom-keycloak-jwt

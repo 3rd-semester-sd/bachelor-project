@@ -30,6 +30,7 @@ export const usersTable = pgTable(
   },
   (t) => [index("name_idx").on(t.name), uniqueIndex("email_idx").on(t.email)]
 );
+
 export const restaurantsTable = pgTable("restaurant", {
   restaurant_id: uuid().primaryKey().defaultRandom(),
   restaurant_name: varchar({ length: 255 }).notNull(),

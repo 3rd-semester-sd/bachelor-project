@@ -1,40 +1,29 @@
-from langchain.chains import LLMChain
-from langchain.prompts import PromptTemplate
-from langchain.chat_models import ChatOpenAI
-from langchain_postgres import PGVector
-from langchain.embeddings import OpenAIEmbeddings
+from openai import AsyncAzureOpenAI
+
+from api.dtos.chat_dtos import UserPrompt
+
+client = AsyncAzureOpenAI(
+    api_key="Fl2MFnbWqc0tnY9rK53c3KnbDbEZCs8PjrVZ3fl4krVtV3A3vPEZJQQJ99AKACHYHv6XJ3w3AAAAACOG0sUE",
+    api_version="2024-08-01-preview",
+    azure_endpoint="https://moha3-m3uad3g1-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2024-08-01-preview",
+)
 
 
-async def search_and_generate_response(user_query: str, session):
-    # Initialize PGVector search
-    embedding_model = OpenAIEmbeddings(openai_api_key="your_openai_api_key")
-    vector_store = PGVector(
-        collection_name="restaurant_data",
-        connection_string="postgresql+asyncpg://ai:ai@localhost/pg-ai-service",
-        embedding_function=embedding_model,
+async def make_chat(prompt: UserPrompt, client: AsyncAzureOpenAI = client):
+    response = await client.chat.completions.create(
+        model="gpt-4",  # model = "deployment_name".
+        messages=[
+            {
+                "role": "system",
+                "content": "Assistant is a large language model trained by OpenAI.",
+            },
+            {"role": "user", "content": prompt.prompt},
+        ],
+        temperature=0,
     )
 
-    # Search relevant context
-    results = vector_store.similarity_search(user_query, k=3)
-    context = "\n".join([result["description"] for result in results])
-
-    # Create Chat Prompt
-    prompt = PromptTemplate(
-        input_variables=["context", "query"],
-        template="""
-        You are an assistant providing information about restaurants. 
-        Given the following context, answer the user's query.
-
-        Context:
-        {context}
-
-        Query:
-        {query}
-        """,
-    )
-
-    llm = ChatOpenAI(openai_api_key="your_openai_api_key")
-    chain = LLMChain(llm=llm, prompt=prompt)
-    response = chain.run(context=context, query=user_query)
+    print("the prompt given: ", prompt)
+    print("------------------------------")
+    print(response.choices[0].message.content)
 
     return response

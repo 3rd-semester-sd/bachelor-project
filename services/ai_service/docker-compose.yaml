@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-ai-service-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: "ai"
+      POSTGRES_USER: "ai"
+      POSTGRES_DB: "pg-ai-service"
+    restart: always
+    healthcheck:
+      test: pg_isready -U ai -d pg-ai-service
+      interval: 2s
+      timeout: 3s
+      retries: 40
+volumes:
+  pg-ai-service-data:
+    driver: local

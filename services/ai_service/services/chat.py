@@ -1,17 +1,13 @@
 from openai import AsyncAzureOpenAI
 
 from api.dtos.chat_dtos import UserPrompt
-
-client = AsyncAzureOpenAI(
-    api_key="Fl2MFnbWqc0tnY9rK53c3KnbDbEZCs8PjrVZ3fl4krVtV3A3vPEZJQQJ99AKACHYHv6XJ3w3AAAAACOG0sUE",
-    api_version="2024-08-01-preview",
-    azure_endpoint="https://moha3-m3uad3g1-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2024-08-01-preview",
-)
+from services.client import client
 
 
 async def make_chat(prompt: UserPrompt, client: AsyncAzureOpenAI = client):
+    print("prompt len", len(prompt.prompt))
     response = await client.chat.completions.create(
-        model="gpt-4",  # model = "deployment_name".
+        model="gpt-35-turbo",  # model = "deployment_name".
         messages=[
             {
                 "role": "system",

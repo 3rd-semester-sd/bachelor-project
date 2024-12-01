@@ -14,3 +14,9 @@
    ```bash
    tilt down
    ```
+
+
+(Windows) Martin rebuild Lua scripts
+```
+k delete configmap custom-keycloak-jwt && tilt down && while kga | grep -q "pod"; do sleep 2; done && tilt up
+```

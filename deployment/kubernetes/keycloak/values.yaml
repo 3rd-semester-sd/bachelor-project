@@ -39,3 +39,7 @@ postgresql:
 
 autoscaling:
   enabled: false
+
+extraEnv:
+  - name: KEYCLOAK_FRONTEND_URL
+    value: "http://keycloak.default.svc.cluster.local"

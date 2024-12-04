@@ -23,7 +23,7 @@ class RestaurantSearchDTO(RestaurantInputDTO):
 
 
 class UserPrompt(BaseModel):
-    restaurants: list[RestaurantInputDTO]
+    restaurants: list[RestaurantModelDTO]
     user_input: str
 
     @property

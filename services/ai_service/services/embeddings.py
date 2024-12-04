@@ -1,4 +1,3 @@
-from langchain.embeddings import OpenAIEmbeddings
 from openai import AsyncAzureOpenAI
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import insert, select
@@ -6,7 +5,6 @@ from api.dtos.chat_dtos import (
     RestaurantEmbeddingInputDTO,
     RestaurantInputDTO,
     RestaurantModelDTO,
-    RestaurantSearchDTO,
     UserRequestDTO,
 )
 from db.models import RestaurantDataModel
@@ -53,7 +51,7 @@ async def search_embedding(
     session: AsyncSession,
     client: AsyncAzureOpenAI = embedding_client,
     model: str = "text-embedding-ada-002",
-) -> list[RestaurantInputDTO]:
+) -> list[RestaurantModelDTO]:
     embedding = await _generate_embedding(
         input_dto.user_input, client=client, model=model
     )

@@ -32,4 +32,4 @@ class RestaurantDataModel(Base):
 
     name: Mapped[str] = mapped_column(sa.String(255))
     description: Mapped[str] = mapped_column(sa.String(5000))
-    embedding = mapped_column(Vector(1536))
+    embedding = mapped_column(Vector(3072))

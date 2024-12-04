@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from api.dtos.chat_dtos import RestaurantInputDTO, RestaurantEmbeddingInputDTO
+from api.dtos.chat_dtos import RestaurantInputDTO
 from db.dependencies import get_db_session
 from services.embeddings import generate_restaurant_embedding, save_embedding
 

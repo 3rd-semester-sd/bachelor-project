@@ -9,13 +9,11 @@ class RestaurantInputDTO(BaseModel):
     description: str
 
 
-with open("test_data/restaurants.json") as f:
-    # Read the file and parse JSON
-    data = json.load(f)  # Parse JSON directly into a Python object
-
-    # Convert each item into a RestaurantInputDTO
+with open("services/ai_service/test_data/restaurants.json") as f:
+    data = json.load(f)
     dtos = [RestaurantInputDTO(**input_data) for input_data in data]
 
-# Debug print to verify the conversion
+
+# add to db by using endpoint
 for dto in dtos:
     requests.post(url="http://localhost:8000/embedding", json=dto.model_dump())

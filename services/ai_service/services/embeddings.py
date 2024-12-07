@@ -71,7 +71,7 @@ async def search_embedding(
     model: str = settings.embedding_azure_model,
     limit: int = 2,
 ) -> list[RestaurantModelDTO] | None:
-    """Search for the nearest embeddings."""
+    """Search embedding using similarity search."""
     embedding = await _generate_embedding(
         input_dto.user_input, client=client, model=model
     )

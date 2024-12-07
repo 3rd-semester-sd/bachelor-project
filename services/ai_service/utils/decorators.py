@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def handle_db_errors(func: Callable[..., Awaitable[R]]) -> Callable[..., Awaitable[R]]:
     """Decorator to handle database-specific errors."""
-    # Add more as needed 
+    # Add more exceptions as needed 
     @wraps(func)
     async def wrapper(*args: Any, **kwargs: Any) -> R:
         try:

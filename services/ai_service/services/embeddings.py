@@ -12,44 +12,50 @@ from services.client import embedding_client
 from settings import settings
 import logging
 
+from utils.decorators import handle_db_errors
+
 logger = logging.getLogger(__name__)
 
 
+@handle_db_errors
 async def save_embedding(
     embedding_input: RestaurantEmbeddingInputDTO, session: AsyncSession
 ) -> None:
     """Save embedding to the database."""
-    try:
-        query = insert(RestaurantDataModel).values(embedding_input.model_dump())
-        await session.execute(query)
-    except Exception as e:
-        logger.error(f"Error saving embedding: {e}")
-        raise
+
+    query = insert(RestaurantDataModel).values(embedding_input.model_dump())
+    await session.execute(query)
 
 
 async def _generate_embedding(
     input_str: str,
     client: AsyncAzureOpenAI,
     model: str,
-) -> list[float]:
+) -> list[float] | None:
     """Generate embedding for a given input string."""
-    try:
-        response = await client.embeddings.create(input=[input_str], model=model)
+    response = await client.embeddings.create(input=[input_str], model=model)
+    if response and response.data:
         return response.data[0].embedding
-    except Exception as e:
-        logger.error(f"Error generating embedding for input '{input_str}': {e}")
-        raise
+    logger.warning(
+        f"No embedding generated for input: '{input_str}'. Response was empty."
+    )
+    return None
 
 
 async def generate_restaurant_embedding(
     input_dto: RestaurantInputDTO,
     client: AsyncAzureOpenAI = embedding_client,
     model: str = settings.embedding_azure_model,
-) -> RestaurantEmbeddingInputDTO:
+) -> RestaurantEmbeddingInputDTO | None:
     """Generate restaurant embedding and return as DTO."""
+
     embedding = await _generate_embedding(
         input_dto.description, client=client, model=model
     )
+    if embedding is None:
+        logger.warning(f"Failed to generate embedding for restaurant: {input_dto.name}")
+        return None
+
     return RestaurantEmbeddingInputDTO(
         name=input_dto.name,
         description=input_dto.description,
@@ -57,24 +63,30 @@ async def generate_restaurant_embedding(
     )
 
 
+@handle_db_errors
 async def search_embedding(
     input_dto: UserRequestDTO,
     session: AsyncSession,
     client: AsyncAzureOpenAI = embedding_client,
     model: str = settings.embedding_azure_model,
-) -> list[RestaurantModelDTO]:
+    limit: int = 2,
+) -> list[RestaurantModelDTO] | None:
     """Search for the nearest embeddings."""
     embedding = await _generate_embedding(
         input_dto.user_input, client=client, model=model
     )
+    if embedding is None:
+        logger.warning("Failed to generate user embedding for search.")
+        return None
+
     query = (
         select(RestaurantDataModel)
         .order_by(RestaurantDataModel.embedding.l2_distance(embedding))
-        .limit(2)
+        .limit(limit)
     )
-    try:
-        result = await session.scalars(query)
-        return [RestaurantModelDTO.model_validate(restaurant) for restaurant in result]
-    except Exception as e:
-        logger.error(f"Error searching embedding: {e}")
-        raise
+    result = await session.scalars(query)
+    return (
+        [RestaurantModelDTO.model_validate(restaurant) for restaurant in result]
+        if result
+        else None
+    )

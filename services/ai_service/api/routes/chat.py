@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from api.dtos.chat_dtos import UserPrompt, UserRequestDTO
 from db.dependencies import get_db_session
 from services.chat import make_chat
@@ -14,8 +14,11 @@ async def chat(
     input_dto: UserRequestDTO, session: AsyncSession = Depends(get_db_session)
 ):
     result = await search_embedding(input_dto=input_dto, session=session)
-    prompt = UserPrompt(user_input=input_dto.user_input, restaurants=result)
+
+    if result is None:
+        raise HTTPException(status_code=404, detail="No embeddings found.")
     
+    prompt = UserPrompt(user_input=input_dto.user_input, restaurants=result)
 
     response = await make_chat(prompt)
     return {"data": response}

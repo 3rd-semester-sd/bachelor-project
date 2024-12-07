@@ -11,6 +11,7 @@ class Settings(BaseSettings):
 
     embedding_azure_key: str = ""
     embedding_azure_endpoint: str = ""
+    embedding_azure_model: str = "text-embedding-ada-002"
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"

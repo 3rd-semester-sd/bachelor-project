@@ -22,9 +22,8 @@ class RestaurantSearchDTO(RestaurantInputDTO):
     restaurants: list[RestaurantInputDTO]
 
 
-class UserPrompt(BaseModel):
+class UserPrompt(UserRequestDTO):
     restaurants: list[RestaurantModelDTO]
-    user_input: str
 
     @property
     def prompt(self):

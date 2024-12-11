@@ -19,7 +19,7 @@ async def chat_with_embeddings(
     chat_client: AsyncAzureOpenAI = Depends(get_chat_client),
     embedding_client: AsyncAzureOpenAI = Depends(get_embedding_client),
 ) -> dict[str, Any]:
-    """Endpoint to generate a response based on user input and embeddings."""
+    """Endpoint for generating a response based on user input and embeddings."""
     try:
         result = await search_embedding(
             input_dto=input_dto, session=session, client=embedding_client

@@ -8,7 +8,7 @@ from app.lifespan import setup_db
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Load the ML model
+    # setup db
     await setup_db(app=app)
     yield
     await app.state.db_engine.dispose()

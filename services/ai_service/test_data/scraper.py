@@ -3,7 +3,6 @@ from typing import Any
 import requests
 from bs4 import BeautifulSoup
 
-# Target URL
 URL = "https://www.timeout.com/copenhagen/restaurants/best-restaurants-in-copenhagen"
 
 # mimic a real browser

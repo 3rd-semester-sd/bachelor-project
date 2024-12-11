@@ -1,12 +1,7 @@
 import json
-
-from pydantic import BaseModel
 import requests
 
-
-class RestaurantInputDTO(BaseModel):
-    name: str
-    description: str
+from api.dtos.chat_dtos import RestaurantInputDTO
 
 
 with open("services/ai_service/test_data/restaurants.json") as f:

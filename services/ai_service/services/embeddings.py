@@ -8,7 +8,6 @@ from api.dtos.chat_dtos import (
     UserRequestDTO,
 )
 from db.models import RestaurantDataModel
-from services.client import embedding_client
 from settings import settings
 import logging
 
@@ -44,7 +43,7 @@ async def _generate_embedding(
 
 async def generate_restaurant_embedding(
     input_dto: RestaurantInputDTO,
-    client: AsyncAzureOpenAI = embedding_client,
+    client: AsyncAzureOpenAI,
     model: str = settings.embedding_azure_model,
 ) -> RestaurantEmbeddingInputDTO | None:
     """Generate restaurant embedding and return as DTO."""
@@ -63,11 +62,11 @@ async def generate_restaurant_embedding(
     )
 
 
-@handle_db_errors
+@handle_db_errors # TODO: loosing typing
 async def search_embedding(
     input_dto: UserRequestDTO,
     session: AsyncSession,
-    client: AsyncAzureOpenAI = embedding_client,
+    client: AsyncAzureOpenAI,
     model: str = settings.embedding_azure_model,
     limit: int = 2,
 ) -> list[RestaurantModelDTO] | None:

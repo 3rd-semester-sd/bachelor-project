@@ -1,25 +1,39 @@
+import logging
 from openai import AsyncAzureOpenAI
-
 from api.dtos.chat_dtos import UserPrompt
-from services.client import client
+from settings import settings
+
+logger = logging.getLogger(__name__)
+
+DEFAULT_TEMPERATURE = 0
 
 
-async def make_chat(prompt: UserPrompt, client: AsyncAzureOpenAI = client):
-    print("prompt len", len(prompt.prompt))
-    response = await client.chat.completions.create(
-        model="gpt-35-turbo",  # model = "deployment_name".
-        messages=[
-            {
-                "role": "system",
-                "content": "Assistant is a large language model trained by OpenAI.",
-            },
-            {"role": "user", "content": prompt.prompt},
-        ],
-        temperature=0,
-    )
+async def generate_chat_response(
+    prompt: UserPrompt,
+    client: AsyncAzureOpenAI,
+    model: str = settings.openai_azure_model,
+    temperature: float = DEFAULT_TEMPERATURE,
+) -> str:
+    """Generate chat response from OpenAI."""
 
-    print("the prompt given: ", prompt)
-    print("------------------------------")
-    print(response.choices[0].message.content)
-
-    return response
+    try:
+        logger.info(
+            f"Generating chat response for prompt of length {len(prompt.prompt)}"
+        )
+        response = await client.chat.completions.create(
+            model=model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Assistant is a large language model trained by OpenAI.",
+                },
+                {"role": "user", "content": prompt.prompt},
+            ],
+            temperature=temperature,
+        )
+        result = response.choices[0].message.content
+        logger.info("Chat response successfully generated.")
+        return result if result else "Nothing generated"
+    except Exception as e:
+        logger.error(f"Failed to generate chat response: {e}")
+        raise RuntimeError("Error while generating chat response.") from e

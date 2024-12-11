@@ -19,4 +19,5 @@ dependencies = [
     "pgvector>=0.2.5",
     "psycopg>=3.2.3",
     "beautifulsoup4>=4.12.3",
+    "tiktoken>=0.8.0",
 ]

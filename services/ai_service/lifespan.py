@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from db.meta import meta
-from db.models import Base
 from settings import settings
 
 

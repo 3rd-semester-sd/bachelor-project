@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://ai:ai@localhost/pg-ai-service"
     openai_azure_key: str = ""
     openai_azure_endpoint: str = ""
+    openai_azure_model: str = "gpt-4"
 
     embedding_azure_key: str = ""
     embedding_azure_endpoint: str = ""

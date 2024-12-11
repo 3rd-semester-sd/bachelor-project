@@ -1,14 +1,14 @@
 from openai import AsyncAzureOpenAI
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from api.dtos.chat_dtos import (
+from app.api.dtos.chat_dtos import (
     RestaurantEmbeddingInputDTO,
     RestaurantInputDTO,
     RestaurantModelDTO,
     UserRequestDTO,
 )
-from db.models import RestaurantDataModel
-from settings import settings
+from app.db.models import RestaurantDataModel
+from app.settings import settings
 import logging
 
 from utils.decorators import handle_db_errors

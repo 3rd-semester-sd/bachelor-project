@@ -1,7 +1,7 @@
 import json
 import requests
 
-from api.dtos.chat_dtos import RestaurantInputDTO
+from app.api.dtos.chat_dtos import RestaurantInputDTO
 
 
 with open("services/ai_service/test_data/restaurants.json") as f:

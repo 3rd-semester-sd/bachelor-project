@@ -1,9 +1,9 @@
 from fastapi import FastAPI
-from api.routes.chat import router as chat_router
-from api.routes.embedding import router as embedding_router
+from app.api.routes.chat import router as chat_router
+from app.api.routes.embedding import router as embedding_router
 from contextlib import asynccontextmanager
 
-from lifespan import setup_db
+from app.lifespan import setup_db
 
 
 @asynccontextmanager

@@ -4,7 +4,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from pgvector.sqlalchemy import Vector  # type: ignore
 
-from db.meta import meta
+from app.db.meta import meta
 
 
 class Base(DeclarativeBase):

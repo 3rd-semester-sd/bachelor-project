@@ -1,7 +1,7 @@
 import logging
 from openai import AsyncAzureOpenAI
-from api.dtos.chat_dtos import UserPrompt
-from settings import settings
+from app.api.dtos.chat_dtos import UserPrompt
+from app.settings import settings
 
 logger = logging.getLogger(__name__)
 

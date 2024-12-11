@@ -1,5 +1,5 @@
 from openai import AsyncAzureOpenAI
-from settings import settings
+from app.settings import settings
 
 
 def get_chat_client() -> AsyncAzureOpenAI:

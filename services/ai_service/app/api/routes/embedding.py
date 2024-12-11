@@ -2,10 +2,10 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from openai import AsyncAzureOpenAI
 from sqlalchemy.ext.asyncio import AsyncSession
-from api.dtos.chat_dtos import RestaurantEmbeddingInputDTO, RestaurantInputDTO
-from db.dependencies import get_db_session
-from services.client import get_embedding_client
-from services.embeddings import generate_restaurant_embedding, save_embedding
+from app.api.dtos.chat_dtos import RestaurantEmbeddingInputDTO, RestaurantInputDTO
+from app.db.dependencies import get_db_session
+from app.services.client import get_embedding_client
+from app.services.embeddings import generate_restaurant_embedding, save_embedding
 
 router = APIRouter()
 

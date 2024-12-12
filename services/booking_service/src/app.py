@@ -1,11 +1,10 @@
-from services.rabbit.lifetime import init_rabbit, shutdown_rabbit
+# from services.rabbit.lifetime import init_rabbit, shutdown_rabbit
 from settings import settings
 
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from fastapi import FastAPI
 from routes import base_router
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from db import db_lifetime
 
 
@@ -16,14 +15,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     await db_lifetime.setup_db_ro(app)
     await db_lifetime.setup_db(app)
 
-    init_rabbit(app)
+    # init_rabbit(app)
 
     yield
 
     await db_lifetime.shutdown_db_ro(app)
     await db_lifetime.shutdown_db(app)
 
-    await shutdown_rabbit(app)
+    # await shutdown_rabbit(app)
 
 
 def get_app() -> FastAPI:

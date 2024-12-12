@@ -1,3 +1,4 @@
+from datetime import datetime
 import uuid
 
 import sqlalchemy as sa
@@ -24,19 +25,21 @@ class Booking(Base):
     phone_number: Mapped[str] = mapped_column(
         sa.String,
     )
-    booking_date: Mapped[sa.Date] = mapped_column(
-        sa.Date,
+    booking_time: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=True),
     )
-    booking_time: Mapped[sa.Time] = mapped_column(
-        sa.Time,
-    )
-    number_of_people: Mapped[int] = mapped_column(
-        sa.Integer,
-    )
+    number_of_people: Mapped[int] = mapped_column(sa.Integer())
     special_request: Mapped[str] = mapped_column(
         sa.String,
     )
     status: Mapped[BookingStatus] = mapped_column(
-        sa.Enum(BookingStatus),
+        sa.Enum(BookingStatus, name="booking_status"),
         default=BookingStatus.PENDING,
+    )
+
+    __table_args__ = (
+        sa.CheckConstraint(
+            "booking_time > now()", name="booking_time_gt_now_constraint"
+        ),
+        sa.Index("booking_restaurant_id_idx", "restaurant_id"),
     )

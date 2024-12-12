@@ -1,12 +1,11 @@
 from datetime import datetime
 from typing import Annotated, Literal
-from uuid import UUID
 
 from aio_pika import Channel, Message
 from aio_pika.pool import Pool
 from fastapi import Depends, Request
 from pydantic import BaseModel
-from datetime import datetime, timezone
+from datetime import timezone
 from pydantic import computed_field
 
 

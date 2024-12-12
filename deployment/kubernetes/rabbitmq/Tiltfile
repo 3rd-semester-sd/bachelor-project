@@ -1,0 +1,13 @@
+load("ext://helm_resource", "helm_resource", "helm_repo")
+
+helm_repo(name="bitnami", url="https://charts.bitnami.com/bitnami")
+helm_resource(
+    name="rabbitmq",
+    chart="bitnami/rabbitmq",
+    flags=["--values=./values.yaml"],
+)   
+
+local_resource(
+    "rabbitmq-pf",
+    serve_cmd="kubectl port-forward service/rabbitmq 15672:15672",
+)

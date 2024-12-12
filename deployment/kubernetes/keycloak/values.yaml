@@ -1,3 +1,4 @@
+
 image:
   registry: docker.io
   repository: bitnami/keycloak
@@ -39,3 +40,7 @@ postgresql:
 
 autoscaling:
   enabled: false
+
+ingress:
+  enabled: true
+  hostname: keycloak.local

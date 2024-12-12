@@ -3,6 +3,8 @@ image: example-image
 container_port: 8000
 namespace: default
 
+replicaCount: 1
+
 env:
   example_service_host: booking
   example_service_port: 8000
@@ -17,3 +19,30 @@ resources:
   limits:
     memory: "256Mi"
     cpu: "1"
+
+postgresql:
+  enabled: false
+  # `standalone` or `replication`
+  architecture: standalone
+  auth:
+    enablePostgresUser: true
+    postgresPassword: postgres
+    username: postgres
+    password: postgres
+    database: example-db
+
+    # only used when `architecture` is `replication`
+    replicationUsername: postgres_repl
+    replicationPassword: postgres_repl
+ 
+  # only used when `architecture` is `replication`
+  readReplicas:
+    replicaCount: 1
+
+
+
+
+  #  existingSecret: example-db
+  #  secretKeys:
+  #    userPasswordKey: password
+  #architecture: standalone

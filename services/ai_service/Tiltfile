@@ -1,0 +1,20 @@
+docker_build("ai-image", ".", dockerfile="./Dockerfile")
+
+yaml = helm(
+    "../../deployment/charts/base",
+    name="ai-release",
+    values=["../../deployment/kubernetes/ai_service/values.yaml"],
+)
+k8s_yaml(yaml)
+
+# deploy the PostgreSQL Helm chart
+# postgres_yaml = helm(
+#     "../../deployment/charts/postgresql",
+#     name="postgresql-ai",
+#     values=["../../deployment/kubernetes/ai_service/postgresql-values.yaml"],
+# )
+# k8s_yaml(postgres_yaml)
+
+# k8s_resource("postgresql-ai", port_forwards=5434)
+
+k8s_resource("ai", port_forwards=8089)

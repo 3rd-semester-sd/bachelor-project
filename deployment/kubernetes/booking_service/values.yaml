@@ -1,14 +1,31 @@
-app_name: booking
+app_name: booking-service
 image: booking-image
 container_port: 8000
 namespace: default
 
+replicaCount: 1
+
 env: 
-  booking_service_host: "0.0.0.0"
-  booking_service_port: 8000
-  booking_service_workers: "1"
-  booking_service_log_level: "info"
-  booking_service_reload: "true"
+  BOOKING_SERVICE_HOST: "0.0.0.0"
+  BOOKING_SERVICE_PORT: 8000
+  BOOKING_SERVICE_WORKERS: 1
+  BOOKING_SERVICE_LOG_LEVEL: info
+
+  BOOKING_SERVICE_PG_HOST: "booking-release-postgresql-primary"
+  BOOKING_SERVICE_PG_PORT: 5432
+  BOOKING_SERVICE_PG_USER: "postgres"
+  BOOKING_SERVICE_PG_PASSWORD: "postgres"
+  BOOKING_SERVICE_PG_DB: "booking-db"
+  BOOKING_SERVICE_PG_POOL_SIZE: 15
+  BOOKING_SERVICE_PG_ECHO: false
+
+  BOOKING_SERVICE_PG_RO_HOST: "booking-release-postgresql-read"
+  BOOKING_SERVICE_PG_RO_PORT: 5432
+  BOOKING_SERVICE_PG_RO_USER: "postgres_repl"
+  BOOKING_SERVICE_PG_RO_PASSWORD: "postgres_repl"
+  BOOKING_SERVICE_PG_RO_DB: "booking-db"
+  BOOKING_SERVICE_PG_RO_POOL_SIZE: 15
+  BOOKING_SERVICE_PG_RO_ECHO: false
 
 resources:
   requests:
@@ -17,3 +34,18 @@ resources:
   limits:
     memory: "256Mi"
     cpu: "1"
+
+postgresql:
+  enabled: true
+  architecture: replication
+  auth:
+    postgresPassword: postgres
+    username: postgres
+    password: postgres
+    database: booking-db
+
+    replicationUsername: postgres_repl
+    replicationPassword: postgres_repl
+
+  readReplicas:
+    replicaCount: 1

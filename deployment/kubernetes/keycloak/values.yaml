@@ -1,3 +1,4 @@
+
 image:
   registry: docker.io
   repository: bitnami/keycloak
@@ -40,6 +41,6 @@ postgresql:
 autoscaling:
   enabled: false
 
-extraEnv:
-  - name: KEYCLOAK_FRONTEND_URL
-    value: "http://keycloak.default.svc.cluster.local"
+ingress:
+  enabled: true
+  hostname: keycloak.local

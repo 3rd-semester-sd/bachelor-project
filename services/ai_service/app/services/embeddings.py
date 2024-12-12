@@ -44,7 +44,7 @@ async def _generate_embedding(
 async def generate_restaurant_embedding(
     input_dto: RestaurantInputDTO,
     client: AsyncAzureOpenAI,
-    model: str = settings.embedding_azure_model,
+    model: str = settings.ai_embedding_azure_model,
 ) -> RestaurantEmbeddingInputDTO | None:
     """Generate restaurant embedding and return as DTO."""
 
@@ -62,12 +62,12 @@ async def generate_restaurant_embedding(
     )
 
 
-@handle_db_errors # TODO: loosing typing
+@handle_db_errors  # TODO: loosing typing
 async def search_embedding(
     input_dto: UserRequestDTO,
     session: AsyncSession,
     client: AsyncAzureOpenAI,
-    model: str = settings.embedding_azure_model,
+    model: str = settings.ai_embedding_azure_model,
     limit: int = 2,
 ) -> list[RestaurantModelDTO] | None:
     """Search embedding using similarity search."""

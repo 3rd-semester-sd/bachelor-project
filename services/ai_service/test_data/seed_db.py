@@ -1,7 +1,10 @@
 import json
 import requests
+from pydantic import BaseModel
 
-from app.api.dtos.chat_dtos import RestaurantInputDTO
+class RestaurantInputDTO(BaseModel):
+    name: str
+    description: str
 
 
 with open("services/ai_service/test_data/restaurants.json") as f:
@@ -11,4 +14,4 @@ with open("services/ai_service/test_data/restaurants.json") as f:
 
 # add to db by using endpoint
 for restaurant in restaurants:
-    requests.post(url="http://localhost:8000/embedding", json=restaurant.model_dump())
+    requests.post(url="http://localhost:8089/embedding", json=restaurant.model_dump())

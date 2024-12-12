@@ -11,7 +11,7 @@ DEFAULT_TEMPERATURE = 0
 async def generate_chat_response(
     prompt: UserPrompt,
     client: AsyncAzureOpenAI,
-    model: str = settings.openai_azure_model,
+    model: str = settings.ai_openai_azure_model,
     temperature: float = DEFAULT_TEMPERATURE,
 ) -> str:
     """Generate chat response from OpenAI."""

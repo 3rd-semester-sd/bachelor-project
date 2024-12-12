@@ -17,7 +17,7 @@ dependencies = [
     "greenlet>=3.1.1",
     "langchain-postgres>=0.0.12",
     "pgvector>=0.2.5",
-    "psycopg>=3.2.3",
+    "psycopg[async]>=3.2.3",
     "beautifulsoup4>=4.12.3",
     "tiktoken>=0.8.0",
 ]

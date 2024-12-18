@@ -23,3 +23,22 @@ resources:
   limits:
     memory: "256Mi"
     cpu: "1"
+    
+postgresql:
+  enabled: true
+  architecture: replication
+  auth:
+    postgresPassword: postgres
+    username: ai
+    password: ai
+    database: pg-ai-service
+
+    replicationUsername: postgres_repl
+    replicationPassword: postgres_repl
+
+  readReplicas:
+    replicaCount: 1
+
+
+autoscaling:
+  enabled: false

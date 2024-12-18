@@ -8,7 +8,7 @@ import daos
 import dtos
 import exceptions
 
-base_router = APIRouter()
+base_router = APIRouter(prefix="/api")
 
 
 ##################
@@ -76,6 +76,9 @@ async def health_check() -> bool:
 @base_router.post("/send-notification")
 async def send_notification(rmq: GetRMQ) -> bool:
     """Send a notification."""
+
+    await rmq.send_email("test", "test", "test")
+
     return True
 
 

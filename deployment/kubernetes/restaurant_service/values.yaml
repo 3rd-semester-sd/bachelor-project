@@ -9,7 +9,7 @@ env:
   restaurant_service_workers: "1"
   restaurant_service_log_level: "info"
   restaurant_service_reload: "true"
-  restaurant_database_url: "postgresql://restaurant:restaurant@postgresql-release:5432/pg-restaurant-service"
+  restaurant_database_url: "postgresql://postgres:postgres@restaurant-release-postgresql-primary:5432/pg-restaurant-service"
 
 resources:
   requests:
@@ -18,3 +18,22 @@ resources:
   limits:
     memory: "256Mi"
     cpu: "1"
+
+postgresql:
+  enabled: true
+  architecture: replication
+  auth:
+    postgresPassword: postgres
+    username: postgres
+    password: postgres
+    database: pg-restaurant-service
+
+    replicationUsername: postgres_repl
+    replicationPassword: postgres_repl
+
+  readReplicas:
+    replicaCount: 1
+
+
+autoscaling:
+  enabled: false

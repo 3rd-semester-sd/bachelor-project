@@ -12,16 +12,16 @@ services:
       - "5432:5432"
     volumes:
       - pg-restaurant-service-data:/var/lib/postgresql/data
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    environment:
-      DATABASE_URL: postgresql://restaurant:restaurant@db:5432/pg-restaurant-service
-    depends_on:
-      - db
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     DATABASE_URL: postgresql://restaurant:restaurant@db:5432/pg-restaurant-service
+  #   depends_on:
+  #     - db
 
 volumes:
   pg-restaurant-service-data:

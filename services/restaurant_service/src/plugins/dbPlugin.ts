@@ -1,4 +1,9 @@
-import { DbClient, getDbClient } from "~/db/db";
+import {
+  DbClient,
+  getDbClient,
+  migrateDatabase,
+  seedDatabaseTestData,
+} from "~/db/db";
 import { RawServerBase } from "fastify";
 import { fastifyPlugin } from "fastify-plugin";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
@@ -18,7 +23,9 @@ export const dbPlugin = fastifyPlugin<
   ZodTypeProvider
 >(async (fastify, { databaseUrl }) => {
   fastify.log.info(`[dbPlugin] Initializing db`);
-  const db = getDbClient(databaseUrl);
+  const db = await getDbClient(databaseUrl);
+  await migrateDatabase(db);
+  await seedDatabaseTestData(db);
   fastify.decorate("db", db);
   fastify.db = db;
   fastify.log.info(`[dbPlugin] Initialized`);

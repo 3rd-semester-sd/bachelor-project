@@ -7,7 +7,7 @@ import "dotenv/config";
 
 // Generate and insert test data
 
-async function main() {
+export async function main() {
   // Insert a test user
   // const testUser: User = {
   //   name: "test user",
@@ -84,7 +84,7 @@ async function main() {
     console.log("Test menu items created!");
   }
 }
-// Execute the seed script
-main().catch((error) => {
-  console.error("Error seeding database:", error);
-});
+// // Execute the seed script
+// main().catch((error) => {
+//   console.error("Error seeding database:", error);
+// });

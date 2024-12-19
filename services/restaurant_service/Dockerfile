@@ -13,6 +13,7 @@ FROM node:18-alpine AS production
 WORKDIR /app
 COPY --from=base /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/drizzle ./drizzle
 COPY --from=build /app/dist/static ./static
 
 # expose port

@@ -11,6 +11,7 @@ import {
 } from "fastify-type-provider-zod";
 import AutoLoad from "@fastify/autoload";
 import { dbPlugin } from "./plugins/dbPlugin";
+import { migrateDatabase } from "./db/db";
 
 const fastify = Fastify({
   logger:
@@ -70,6 +71,8 @@ fastify.setSerializerCompiler(serializerCompiler);
 fastify.register(dbPlugin, {
   databaseUrl: process.env.RESTAURANT_DATABASE_URL!,
 });
+
+
 
 // This loads all plugins defined in routes
 // define your routes in one of these

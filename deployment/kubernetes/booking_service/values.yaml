@@ -49,3 +49,6 @@ postgresql:
 
   readReplicas:
     replicaCount: 1
+    
+elasticsearch:
+  enabled: false

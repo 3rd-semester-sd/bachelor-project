@@ -9,7 +9,7 @@ env:
   ai_service_workers: "1"
   ai_service_log_level: "info"
   ai_service_reload: "true"
-  ai_database_url: "postgresql+asyncpg://ai:ai@host.docker.internal:5434/pg-ai-service"
+  ai_database_url: "postgresql+asyncpg://postgres:postgres@ai-release-postgresql-primary:5432/pg-ai-service"
   AI_OPENAI_AZURE_KEY: "FIgB5D8SRxuQaLKTzc92pFjwfs8eJfAAH5pUCigcl8J0xrbkXrqsJQQJ99AKACfhMk5XJ3w3AAABACOGGbGL"
   AI_OPENAI_AZURE_ENDPOINT: "https://ai-skynet.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2024-08-01-preview"
   AI_EMBEDDING_AZURE_KEY: "FIgB5D8SRxuQaLKTzc92pFjwfs8eJfAAH5pUCigcl8J0xrbkXrqsJQQJ99AKACfhMk5XJ3w3AAABACOGGbGL"
@@ -23,22 +23,9 @@ resources:
   limits:
     memory: "256Mi"
     cpu: "1"
-    
-postgresql:
-  enabled: true
-  architecture: replication
-  auth:
-    postgresPassword: postgres
-    username: ai
-    password: ai
-    database: pg-ai-service
-
-    replicationUsername: postgres_repl
-    replicationPassword: postgres_repl
-
-  readReplicas:
-    replicaCount: 1
-
 
 autoscaling:
+  enabled: true
+
+elasticsearch:
   enabled: false

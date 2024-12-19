@@ -29,3 +29,8 @@ dependencies:
   name: postgresql
   repository: oci://registry-1.docker.io/bitnamicharts
   version: 16.x.x
+
+- condition: elasticsearch.enabled
+  name: elasticsearch
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 21.x.x

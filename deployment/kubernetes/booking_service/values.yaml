@@ -1,7 +1,6 @@
 app_name: booking-service
 image: booking-image
 container_port: 8000
-namespace: default
 
 replicaCount: 1
 
@@ -37,6 +36,7 @@ resources:
 
 postgresql:
   enabled: true
+  fullnameOverride: booking-pg
   architecture: replication
   auth:
     postgresPassword: postgres

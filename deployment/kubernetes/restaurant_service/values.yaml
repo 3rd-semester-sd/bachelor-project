@@ -1,7 +1,6 @@
 app_name: restaurant
 image: restaurant-image
 container_port: 3000
-namespace: default
 
 env: 
   restaurant_service_host: "0.0.0.0"
@@ -21,6 +20,7 @@ resources:
 
 postgresql:
   enabled: true
+  fullnameOverride: restaurant-pg
   architecture: replication
   auth:
     postgresPassword: postgres

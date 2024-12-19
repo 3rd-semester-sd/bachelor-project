@@ -20,4 +20,5 @@ dependencies = [
     "psycopg[async]>=3.2.3",
     "beautifulsoup4>=4.12.3",
     "tiktoken>=0.8.0",
+    "faker>=33.1.0",
 ]

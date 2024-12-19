@@ -17,6 +17,9 @@ services:
       interval: 2s
       timeout: 3s
       retries: 40
+
+
 volumes:
   pg-ai-service-data:
     driver: local
+

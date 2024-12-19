@@ -8,16 +8,16 @@ env:
   restaurant_service_workers: "1"
   restaurant_service_log_level: "info"
   restaurant_service_reload: "true"
-  restaurant_database_url: "postgresql://postgres:postgres@restaurant-release-postgresql-primary:5432/pg-restaurant-service"
+  restaurant_database_url: "postgresql://postgres:postgres@restaurant-pg-primary:5432/pg-restaurant-service"
   node_env: "DEV"
 
 resources:
   requests:
-    memory: "128Mi"
-    cpu: "500m"
-  limits:
     memory: "256Mi"
-    cpu: "1"
+    cpu: "1000m"
+  limits:
+    memory: "512Mi"
+    cpu: "2"
 
 postgresql:
   enabled: true
@@ -41,7 +41,7 @@ autoscaling:
 
 # Enable or disable Elasticsearch
 elasticsearch:
-  enabled: true
+  enabled: false
   replicaCount: 0
   minimumMasterNodes: 1
   persistence:
@@ -49,8 +49,8 @@ elasticsearch:
     size: 10Gi
   resources:
     limits:
-      cpu: 1
-      memory: 2Gi
+      cpu: 2
+      memory: 4Gi
     requests:
       cpu: 0.5
       memory: 1Gi

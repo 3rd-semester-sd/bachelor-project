@@ -37,6 +37,7 @@ export async function main() {
     restaurant_name: faker.company.name(),
     restaurant_address: faker.location.streetAddress(),
     restaurant_location: faker.location.city(),
+    restaurant_description: faker.word.sample(),
     cuisine_type: faker.helpers.arrayElement(Object.values(CuisineType)),
   };
 

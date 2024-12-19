@@ -12,6 +12,7 @@ import {
 import AutoLoad from "@fastify/autoload";
 import { dbPlugin } from "./plugins/dbPlugin";
 import { migrateDatabase } from "./db/db";
+import fastifyElasticsearch from "@fastify/elasticsearch";
 
 const fastify = Fastify({
   logger:
@@ -71,8 +72,9 @@ fastify.setSerializerCompiler(serializerCompiler);
 fastify.register(dbPlugin, {
   databaseUrl: process.env.RESTAURANT_DATABASE_URL!,
 });
-
-
+fastify.register(fastifyElasticsearch, {
+  node: "http://localhost:9200",
+});
 
 // This loads all plugins defined in routes
 // define your routes in one of these

@@ -36,6 +36,7 @@ export const restaurantsTable = pgTable("restaurant", {
   restaurant_name: varchar({ length: 255 }).notNull(),
   restaurant_address: varchar({ length: 255 }).notNull(),
   restaurant_location: varchar({ length: 255 }).notNull(),
+  restaurant_description: varchar({ length: 5120 }).notNull(),
   cuisine_type: cuisineTypePgEnum(),
 });
 

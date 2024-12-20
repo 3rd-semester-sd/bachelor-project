@@ -19,6 +19,9 @@ resources:
     memory: "512Mi"
     cpu: "2"
 
+autoscaling:
+  enabled: false
+
 postgresql:
   enabled: true
   fullnameOverride: restaurant-pg
@@ -35,11 +38,6 @@ postgresql:
   readReplicas:
     replicaCount: 1
 
-
-autoscaling:
-  enabled: false
-
-# Enable or disable Elasticsearch
 elasticsearch:
   enabled: false
   replicaCount: 0

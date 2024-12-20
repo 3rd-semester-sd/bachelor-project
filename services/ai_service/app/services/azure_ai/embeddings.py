@@ -1,5 +1,5 @@
 from openai import AsyncAzureOpenAI
-from app.api.dtos.chat_dtos import (
+from app.api.dtos.dtos import (
     RestaurantEmbeddingInputDTO,
     RestaurantInputDTO,
     RestaurantModelDTO,
@@ -8,7 +8,7 @@ from app.api.dtos.chat_dtos import (
 
 from app.settings import settings
 import logging
-from app.db.dependencies import ElasticsearchService, GetES
+from app.services.es.dependencies import ElasticsearchService, GetES
 
 
 logger = logging.getLogger(__name__)

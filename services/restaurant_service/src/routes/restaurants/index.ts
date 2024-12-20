@@ -41,7 +41,6 @@ export const route: BasePlugin = async (fastify, opts) => {
 
         //  total count
         const hits = esResult.hits.hits;
-        console.log(hits);
         const totalItems = hits.length ?? 0;
         const totalPages = Math.ceil(totalItems / pageSize);
 
@@ -50,7 +49,6 @@ export const route: BasePlugin = async (fastify, opts) => {
           restaurant_id: hit._id,
           ...hit._source,
         }));
-        console.log(data);
 
         return res.status(200).send({
           data,
@@ -82,15 +80,21 @@ export const route: BasePlugin = async (fastify, opts) => {
       const { id } = req.params;
 
       try {
-        const result = await fastify.db
-          .select()
-          .from(restaurantsTable)
-          .where(eq(restaurantsTable.restaurant_id, id));
+        const esResult = await fastify.elastic.search<RestaurantResponseDTO>({
+          index: "restaurants",
+          query: { match: { _id: id } },
+        });
 
+        const result = esResult.hits.hits;
+        console.log(result);
         if (result.length === 0) {
           res.status(404).send({ error: "No restaurant found." });
         }
-        return res.status(200).send({ data: result[0] });
+        const data = result.map((hit) => ({
+          restaurant_id: hit._id,
+          ...hit._source,
+        }));
+        return res.status(200).send({ data: data[0] });
       } catch (e) {
         return res.status(500).send({ error: `something went wrong: ${e}` });
       }
@@ -110,36 +114,52 @@ export const route: BasePlugin = async (fastify, opts) => {
     },
     handler: async (req, res) => {
       try {
+        // Insert into postgres
         const result = await fastify.db
           .insert(restaurantsTable)
           .values(req.body)
           .returning({ restaurant_id: restaurantsTable.restaurant_id });
 
-        // add to index
+        // Add to elastic search
         await fastify.elastic.index({
           index: "restaurants",
           id: result[0].restaurant_id,
           document: req.body,
         });
-        // Prepare the message to be sent to RabbitMQ
-        const queue = "new_restaurant_queue";
+
         const msg = {
           restaurant_id: result[0].restaurant_id,
           description: req.body.restaurant_description,
         };
 
-        // Assert the queue exists (idempotent operation)
-        await fastify.amqp.channel.assertQueue(queue, {
-          durable: true, // if it should be persisted
-        });
-
         const msgBuffer = Buffer.from(JSON.stringify(msg));
-        // publish the message to the queue
-        fastify.amqp.channel.sendToQueue(queue, msgBuffer);
+
+        // Publish the message to the exchange
+        const exchangeName = "new_restaurant_exchange";
+        const routingKey = "";
+
+        const publishResult = fastify.amqp.channel.publish(
+          exchangeName,
+          routingKey,
+          msgBuffer,
+          {
+            persistent: true,
+          }
+        );
+
+        if (!publishResult) {
+          fastify.log.error("Failed to publish message to RabbitMQ exchange");
+          throw new Error("Failed to publish message to RabbitMQ exchange");
+        }
 
         return res.status(200).send({ data: result[0].restaurant_id });
       } catch (e) {
-        return res.status(500).send({ error: `something went wrong: ${e}` });
+        fastify.log.error(
+          `Error in POST /restaurants: ${(e as Error).message}`
+        );
+        return res
+          .status(500)
+          .send({ error: `something went wrong: ${(e as Error).message}` });
       }
     },
   });

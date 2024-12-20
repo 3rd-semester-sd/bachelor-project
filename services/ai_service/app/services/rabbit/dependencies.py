@@ -1,19 +1,17 @@
-import json
 from typing import Annotated
-from uuid import UUID
-from aio_pika import IncomingMessage
+from aio_pika import ExchangeType, IncomingMessage
 from aio_pika import Channel
 from aio_pika.pool import Pool
 from fastapi import Depends, Request, logger
 from openai import AsyncAzureOpenAI
-from pydantic import BaseModel
-
-from app.db.dependencies import ElasticsearchService
-from app.services.embeddings import generate_restaurant_embedding
-from app.api.dtos.chat_dtos import RestaurantInputDTO
 
 
-def get_rmq_channel_pool(request: Request) -> Pool[Channel]:  # pragma: no cover
+from app.services.es.dependencies import ElasticsearchService
+from app.services.azure_ai.embeddings import generate_restaurant_embedding
+from app.api.dtos.dtos import RestaurantInputDTO
+
+
+def get_rmq_channel_pool(request: Request) -> Pool[Channel]:
     """
     Get channel pool from the state.
 
@@ -37,9 +35,13 @@ class RMQService:
         self.es_service = es_service
 
     async def handle_message(self, message: IncomingMessage) -> None:
-        print("hello")
+        """
+        Function that handles incoming messages from the queue.
+        When a message is received, it gets parsed then processed,
+        further in the embedding function.
+        """
+
         async with message.process():
-            print("hello, INSIDE")
             try:
                 body_str = message.body.decode("utf-8")
                 data = RestaurantInputDTO.model_validate_json(body_str)
@@ -55,16 +57,25 @@ class RMQService:
 
     async def declare_and_consume(self):
         """
-        Declare the queue, and start consuming it.
-        When a message is received notify the user.
+        Declare the exchange and queue, and start consuming it.
+        When a message is received it gets handled accordingly.
         """
 
         async with self.pool.acquire() as conn:
+            exchange_name = "new_restaurant_exchange"
+            exchange_type = ExchangeType.FANOUT
+
+            exchange = await conn.declare_exchange(
+                exchange_name,
+                exchange_type,
+                durable=True,
+            )
             queue_name = "new_restaurant_queue"
-            print("declaring", queue_name)
             queue = await conn.declare_queue(queue_name, durable=True)
-        # start consuming
-        await queue.consume(self.handle_message)
+            # bind queue
+            await queue.bind(exchange=exchange, routing_key="")
+            # start consuming
+            await queue.consume(self.handle_message)
 
 
 GetRMQ = Annotated[RMQService, Depends(RMQService)]

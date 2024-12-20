@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from openai import AsyncAzureOpenAI
-from app.api.dtos.chat_dtos import RestaurantEmbeddingInputDTO, RestaurantInputDTO
+from app.api.dtos.dtos import RestaurantEmbeddingInputDTO, RestaurantInputDTO
 
-from app.services.client import get_embedding_client
-from app.services.embeddings import generate_restaurant_embedding
+from app.services.azure_ai.client import get_embedding_client
+from app.services.azure_ai.embeddings import generate_restaurant_embedding
 
-from app.db.dependencies import GetES
+from app.services.es.dependencies import GetES
 
 router = APIRouter()
 

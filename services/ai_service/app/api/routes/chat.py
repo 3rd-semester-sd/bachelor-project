@@ -1,12 +1,11 @@
 from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from openai import AsyncAzureOpenAI
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dtos.chat_dtos import RestaurantModelDTO, UserPrompt, UserRequestDTO
-from app.services.chat import generate_chat_response
-from app.services.client import get_chat_client, get_embedding_client
-from app.services.embeddings import search_embedding
+from app.api.dtos.dtos import UserPrompt, UserRequestDTO
+from app.services.azure_ai.chat import generate_chat_response
+from app.services.azure_ai.client import get_chat_client, get_embedding_client
+from app.services.azure_ai.embeddings import search_embedding
 
 router = APIRouter()
 

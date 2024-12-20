@@ -14,6 +14,7 @@ import { dbPlugin } from "./plugins/dbPlugin";
 import { migrateDatabase } from "./db/db";
 import fastifyElasticsearch from "@fastify/elasticsearch";
 import fastifyAmqp from "fastify-amqp";
+import rabbitmqPlugin from "./plugins/rabbitmqPlugin";
 
 const fastify = Fastify({
   logger:
@@ -83,6 +84,13 @@ fastify.register(fastifyAmqp, {
   port: 5672,
   username: "user",
   password: "password",
+});
+
+fastify.register(rabbitmqPlugin, {
+  exchangeName: "new_restaurant_exchange",
+  exchangeType: "fanout",
+  queueName: "new_restaurant_queue",
+  routingKey: "",
 });
 
 // This loads all plugins defined in routes

@@ -12,6 +12,8 @@ export async function getDbClient(db_url: string) {
   return db;
 }
 
+export type DbClient = Awaited<ReturnType<typeof getDbClient>>;
+
 export async function migrateDatabase(db: DbClient) {
   // Run migrations
   await migrate(db, { migrationsFolder: "./drizzle" });
@@ -45,5 +47,3 @@ export async function seedDatabaseTestData(db: DbClient) {
   await seedDatabase();
   console.log("Database seeding completed!");
 }
-
-export type DbClient = Awaited<ReturnType<typeof getDbClient>>;

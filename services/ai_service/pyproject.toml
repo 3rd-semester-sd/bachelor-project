@@ -21,4 +21,6 @@ dependencies = [
     "beautifulsoup4>=4.12.3",
     "tiktoken>=0.8.0",
     "faker>=33.1.0",
+    "elasticsearch-async>=6.2.0",
+    "aio-pika>=9.5.4",
 ]

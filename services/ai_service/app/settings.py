@@ -15,6 +15,10 @@ class Settings(BaseSettings):
 
     ai_elasticsearch_url: str = ""
 
+    ai_rabbit_url: str = "amqp://user:password@localhost:5672/"
+    ai_rabbit_pool_size: int = 5
+    ai_rabbit_channel_pool_size: int = 5
+
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )

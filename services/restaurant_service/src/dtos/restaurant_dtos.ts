@@ -8,6 +8,7 @@ export const restaurantResponseDTO = z.object({
   restaurant_address: z.string().max(255),
   restaurant_location: z.string().max(255),
   cuisine_type: z.nativeEnum(CuisineType).nullable(),
+  embedding: z.array(z.number()).optional().nullable(),
 });
 
 export const restaurantRequestDTO = restaurantResponseDTO.omit({

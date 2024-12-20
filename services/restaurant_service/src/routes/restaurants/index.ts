@@ -41,6 +41,7 @@ export const route: BasePlugin = async (fastify, opts) => {
 
         //  total count
         const hits = esResult.hits.hits;
+        console.log(hits);
         const totalItems = hits.length ?? 0;
         const totalPages = Math.ceil(totalItems / pageSize);
 
@@ -120,6 +121,21 @@ export const route: BasePlugin = async (fastify, opts) => {
           id: result[0].restaurant_id,
           document: req.body,
         });
+        // Prepare the message to be sent to RabbitMQ
+        const queue = "new_restaurant_queue";
+        const msg = {
+          restaurant_id: result[0].restaurant_id,
+          description: req.body.restaurant_description,
+        };
+
+        // Assert the queue exists (idempotent operation)
+        await fastify.amqp.channel.assertQueue(queue, {
+          durable: true, // if it should be persisted
+        });
+
+        const msgBuffer = Buffer.from(JSON.stringify(msg));
+        // publish the message to the queue
+        fastify.amqp.channel.sendToQueue(queue, msgBuffer);
 
         return res.status(200).send({ data: result[0].restaurant_id });
       } catch (e) {

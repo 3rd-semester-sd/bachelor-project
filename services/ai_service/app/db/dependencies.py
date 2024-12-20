@@ -1,20 +1,31 @@
-from typing import AsyncGenerator
-from sqlalchemy import exc as sa_exc
-from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.requests import Request
+from typing import Annotated
+from elasticsearch import AsyncElasticsearch
+from fastapi import Depends, Request
 
 
-async def get_db_session(request: Request) -> AsyncGenerator[AsyncSession, None]:
-    """Create and get database session."""
-    session: AsyncSession = request.app.state.db_session()
-
-    try:
-        yield session
-    except sa_exc.DBAPIError:
-        await session.rollback()
-        raise
-    finally:
-        await session.commit()
-        await session.close()
+def get_es_client(request: Request) -> AsyncElasticsearch:
+    """Get Elasticsearch client from app state."""
+    return request.app.state.es
 
 
+class ElasticsearchService:
+    """Elasticsearch Service."""
+
+    def __init__(
+        self,
+        es_client: AsyncElasticsearch = Depends(get_es_client),
+    ) -> None:
+        self.es_client = es_client
+
+    async def update_restaurant(
+        self,
+        restaurant_id: str,
+        embedding: list[float],
+    ) -> None:
+        doc = {"embedding": embedding}
+        await self.es_client.update(
+            index="restaurants", id=restaurant_id, body={"doc": doc}
+        )
+
+
+GetES = Annotated[ElasticsearchService, Depends(ElasticsearchService)]

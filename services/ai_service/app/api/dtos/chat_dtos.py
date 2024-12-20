@@ -6,12 +6,16 @@ class UserRequestDTO(BaseModel):
 
 
 class RestaurantInputDTO(BaseModel):
-    name: str
+    restaurant_id: str
     description: str
 
 
 class RestaurantModelDTO(RestaurantInputDTO):
     model_config = ConfigDict(from_attributes=True)
+
+
+class RestaurantEmbeddingDTO(RestaurantInputDTO):
+    embedding: list[float]
 
 
 class RestaurantEmbeddingInputDTO(RestaurantInputDTO):

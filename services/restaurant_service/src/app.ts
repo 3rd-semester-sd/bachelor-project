@@ -11,6 +11,9 @@ import {
 } from "fastify-type-provider-zod";
 import AutoLoad from "@fastify/autoload";
 import { dbPlugin } from "./plugins/dbPlugin";
+import { migrateDatabase } from "./db/db";
+import fastifyElasticsearch from "@fastify/elasticsearch";
+import fastifyAmqp from "fastify-amqp";
 
 const fastify = Fastify({
   logger:
@@ -69,6 +72,17 @@ fastify.setSerializerCompiler(serializerCompiler);
 // This loads all plugins defined in plugins
 fastify.register(dbPlugin, {
   databaseUrl: process.env.RESTAURANT_DATABASE_URL!,
+});
+// elastic searcg
+fastify.register(fastifyElasticsearch, {
+  node: process.env.RESTAURANT_RABBIT_URL,
+});
+
+fastify.register(fastifyAmqp, {
+  hostname: "localhost",
+  port: 5672,
+  username: "user",
+  password: "password",
 });
 
 // This loads all plugins defined in routes

@@ -1,21 +1,9 @@
 from fastapi import APIRouter
 
-base_router = APIRouter()
+from services.email_service import email_service
+from dtos import EmailDTO
 
-
-##################
-# Booking routes #
-##################
-
-
-booking_router = APIRouter(prefix="/booking")
-
-
-@booking_router.post("")
-async def create_booking() -> None: ...
-
-
-base_router.include_router(booking_router)
+base_router = APIRouter(prefix="/api")
 
 
 #################
@@ -27,3 +15,22 @@ base_router.include_router(booking_router)
 async def health_check() -> bool:
     """Return True if the service is healthy."""
     return True
+
+
+#################
+# Notification routes #
+#################
+
+
+@base_router.post("/notification")
+async def email():
+    """Send an email."""
+
+    email = EmailDTO(
+        email="martin_laursen9@hotmail.com",
+        subject="Hello",
+        body="Testing sos!",
+        html="<h1>Testiness!</h1>",
+    )
+
+    await email_service.send_email(email)

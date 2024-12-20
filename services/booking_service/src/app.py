@@ -6,6 +6,7 @@ from typing import AsyncGenerator
 from fastapi import FastAPI
 from routes import base_router
 from db import db_lifetime
+from services.redis import lifetime as redis_lifetime
 
 
 @asynccontextmanager
@@ -14,6 +15,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     await db_lifetime.setup_db_ro(app)
     await db_lifetime.setup_db(app)
+
+    redis_lifetime.setup_redis(app)
 
     # init_rabbit(app)
 

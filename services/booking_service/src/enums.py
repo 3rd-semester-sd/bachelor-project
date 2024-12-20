@@ -6,6 +6,4 @@ class BookingStatus(Enum):
 
     PENDING = auto()
     CONFIRMED = auto()
-    CANCELED = auto()
-    COMPLETED = auto()
     REJECTED = auto()

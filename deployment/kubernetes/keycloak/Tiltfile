@@ -1,6 +1,5 @@
 load("ext://helm_resource", "helm_resource", "helm_repo")
 
-helm_repo(name="bitnami", url="https://charts.bitnami.com/bitnami")
 helm_resource(
     name="keycloak",
     chart="bitnami/keycloak",

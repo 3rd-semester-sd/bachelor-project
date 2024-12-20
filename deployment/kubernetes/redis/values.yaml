@@ -1,0 +1,17 @@
+image:
+  registry: docker.io
+  repository: bitnami/redis
+  tag: 7.4.1-debian-12-r2
+
+# `standalone` or `replication`
+architecture: standalone
+
+auth:
+  enabled: false
+  password: password
+
+master:
+  count: 1
+
+replica:
+  replicaCount: 1

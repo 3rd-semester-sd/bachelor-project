@@ -7,14 +7,16 @@ from uuid import UUID, uuid4
 import sqlalchemy as sa
 
 
-from dtos import BookingInputDTO
+from dtos import BookingInputDTO, BookingUpdateDTO
 from models import Booking
 from pydantic import BaseModel
+import datetime
 from sqlalchemy import orm
 
 import exceptions
-
+from datetime import timedelta
 from models import Base
+from enums import BookingStatus
 
 
 Model = TypeVar("Model", bound=Base)
@@ -79,6 +81,60 @@ class BookingReadDAO:
         results = await self.session.execute(query)
         return results.scalar_one_or_none()
 
+    async def count_booked_seats_during_time(
+        self,
+        restaurant_id: UUID,
+        booking_time: datetime.datetime,
+        reservation_time_hr: int,
+    ) -> int:
+        """Count the number of booked seats during a time."""
+
+        dt = timedelta(hours=reservation_time_hr)
+        target_start_time = booking_time
+        target_end_time = booking_time + dt
+
+        query = sa.select(sa.func.sum(Booking.number_of_people)).filter(
+            Booking.restaurant_id == restaurant_id,
+            Booking.booking_time < target_end_time,
+            Booking.booking_time + dt > target_start_time,
+            sa.or_(
+                Booking.status == BookingStatus.CONFIRMED,
+                Booking.status == BookingStatus.PENDING,
+            ),
+        )
+
+        result = await self.session.execute(query)
+        total_people = result.scalar() or 0
+        return total_people
+
+    async def check_duplicate_booking(
+        self,
+        email: str,
+        restaurant_id: UUID,
+        booking_time: datetime.datetime,
+        reservation_time_hr: int,
+    ) -> bool:
+        """Check if a booking exists for the email in the last n hours."""
+
+        dt = timedelta(hours=reservation_time_hr)
+        end_time = booking_time + dt
+
+        query = sa.select(Booking).filter(
+            Booking.email == email,
+            Booking.restaurant_id == restaurant_id,
+            sa.and_(
+                Booking.booking_time < end_time,
+                Booking.booking_time + dt > booking_time,
+            ),
+            sa.or_(
+                Booking.status == BookingStatus.CONFIRMED,
+                Booking.status == BookingStatus.PENDING,
+            ),
+        )
+
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none() is not None
+
     # async def get_offset_results(
     #     self,
     #     out_dto: Type[OutputDTO],
@@ -133,6 +189,24 @@ class BookingWriteDAO:
         self.session.add(base)
         await self.session.flush()
         return id
+
+    async def update(
+        self,
+        id: UUID,
+        update_dto: BookingUpdateDTO,
+    ) -> None:
+        """Update a record."""
+
+        query = (
+            sa.update(Booking)
+            .where(Booking.id == id)
+            .values(
+                **update_dto.model_dump(),
+            )
+        )
+
+        await self.session.execute(query)
+        await self.session.flush()
 
 
 GetDAORO = Annotated[BookingReadDAO, Depends(BookingReadDAO)]

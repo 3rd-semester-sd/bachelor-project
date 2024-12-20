@@ -76,8 +76,8 @@ class BookingInputDTO(_BookingBaseDTO):
 class BookingUpdateDTO(BaseOrmModel):
     """DTO for updating a booking."""
 
-    booking_time: datetime | None = Field(None, gt=datetime.now())
-    number_of_people: int | None = Field(None, ge=1)
+    booking_time: datetime | None = None
+    number_of_people: int | None = None
     special_request: str | None = None
     status: enums.BookingStatus | None = None
 

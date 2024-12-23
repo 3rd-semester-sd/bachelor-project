@@ -1,16 +1,20 @@
 from fastapi import APIRouter
 
-from services.booking_service.src.enums import BookingStatus
+from enums import BookingStatus
 from services.rabbit.dependencies import GetRMQ
 import daos
 import dtos
 import exceptions
-from uuid import uuid4, UUID
-import random
-import string
+from uuid import UUID
 from services.redis.dependencies import GetRedis
+from datetime import datetime
+from constants import BOOKING_CONFIRMATION_EXPIRE_SECONDS
+from fastapi import BackgroundTasks
+import tasks
 
-base_router = APIRouter(prefix="/api")
+import utils
+
+base_router_v1 = APIRouter(prefix="/api/v1")
 
 
 ##################
@@ -21,27 +25,14 @@ base_router = APIRouter(prefix="/api")
 booking_router = APIRouter(prefix="/booking")
 
 
-def _redis_confirmation_key(confirmation_code: str) -> str:
-    return f"booking:{confirmation_code}:confirmation_code"
-
-
-@booking_router.post("")
-async def create_booking(
+def _validate_booking_time(
     input_dto: dtos.BookingInputDTO,
-    r_dao: daos.GetDAORO,
-    w_dao: daos.GetDAO,
-    # rmq: GetRMQ,
-    redis: GetRedis,
-) -> dtos.DefaultCreatedResponse:
-    """Create a booking."""
-
-    # TODO: get these details from restaurant service by id
-    max_seats = 30
-    opening_hr, closing_hr = (10, 22)
-    open_days = (1, 1, 1, 1, 1, 1, 0)
-    reservation_time_hr = 2
-    closing_time_buffer_hr = 2
-
+    open_days: tuple[int, ...],
+    opening_hr: int,
+    closing_hr: int,
+    closing_time_buffer_hr: int,
+) -> None:
+    """Validate the booking time."""
     if open_days[input_dto.booking_time.weekday()] == 0:
         raise exceptions.Http403("Cannot book on this day.")
 
@@ -58,17 +49,14 @@ async def create_booking(
             "to allow for closing."
         )
 
-    # check if same email has already booked a table in the last 2 hours
-    if await r_dao.check_duplicate_booking(
-        email=input_dto.email,
-        restaurant_id=input_dto.restaurant_id,
-        booking_time=input_dto.booking_time,
-        reservation_time_hr=reservation_time_hr,
-    ):
-        raise exceptions.Http403(
-            f"Cannot book another table within {reservation_time_hr} hours."
-        )
 
+async def _validate_seat_availability(
+    r_dao: daos.GetDAORO,
+    input_dto: dtos.BookingInputDTO,
+    max_seats: int,
+    reservation_time_hr: int,
+) -> None:
+    """Validate seat availability."""
     bookings_count = await r_dao.count_booked_seats_during_time(
         restaurant_id=input_dto.restaurant_id,
         booking_time=input_dto.booking_time,
@@ -78,53 +66,190 @@ async def create_booking(
     if bookings_count + input_dto.number_of_people > max_seats:
         raise exceptions.Http403("Not enough seats available.")
 
-    # creates the booking with status `PENDING`
-    obj_id = await w_dao.create(input_dto=input_dto)
 
-    confirmation_code = "".join(
-        random.choices(string.ascii_uppercase + string.digits, k=5)
+async def _validate_booking_overlap(
+    r_dao: daos.GetDAORO,
+    email: str,
+    restaurant_id: UUID,
+    booking_time: datetime,
+    reservation_time_hr: int,
+) -> None:
+    """Check if a booking exists for the email in the last n hours."""
+    if await r_dao.check_duplicate_booking(
+        email=email,
+        restaurant_id=restaurant_id,
+        booking_time=booking_time,
+        reservation_time_hr=reservation_time_hr,
+    ):
+        raise exceptions.Http403(
+            f"Cannot book another table within {reservation_time_hr} hours."
+        )
+
+
+@booking_router.post("")
+async def create_booking(
+    input_dto: dtos.BookingInputDTO,
+    r_dao: daos.GetDAORO,
+    w_dao: daos.GetDAO,
+    rmq: GetRMQ,
+    redis: GetRedis,
+    background_tasks: BackgroundTasks,
+) -> dtos.DefaultCreatedResponse:
+    """Create a booking."""
+
+    # TODO: get these details from restaurant service by id
+    max_seats = 30
+    opening_hr, closing_hr = (10, 22)
+    open_days = (1, 1, 1, 1, 1, 1, 0)
+    reservation_time_hr = 2
+    closing_time_buffer_hr = 2
+    restaurant_name = "Test Restaurant"
+
+    _validate_booking_time(
+        input_dto,
+        open_days,
+        opening_hr,
+        closing_hr,
+        closing_time_buffer_hr,
     )
 
-    # store the confirmation code in redis, with 15 minutes expiry
+    await _validate_booking_overlap(
+        r_dao=r_dao,
+        email=input_dto.email,
+        restaurant_id=input_dto.restaurant_id,
+        booking_time=input_dto.booking_time,
+        reservation_time_hr=reservation_time_hr,
+    )
+
+    await _validate_seat_availability(
+        r_dao=r_dao,
+        input_dto=input_dto,
+        max_seats=max_seats,
+        reservation_time_hr=reservation_time_hr,
+    )
+
+    booking_id = await w_dao.create(input_dto=input_dto)
+    confirmation_code = utils.generate_confirmation_code()
+
+    # store the confirmation code in redis
     await redis.set(
-        _redis_confirmation_key(confirmation_code),
-        str(obj_id),
-        ex=60 * 15,
+        utils.redis_confirmation_key(confirmation_code),
+        str(booking_id),
+        ex=BOOKING_CONFIRMATION_EXPIRE_SECONDS,
     )
 
-    # schedule a task to cancel the booking if not confirmed within 15 minutes
+    # notify the user that their booking has been received
+    background_tasks.add_task(
+        rmq.send_confirmation_email,
+        email=input_dto.email,
+        full_name=input_dto.full_name,
+        phone_number=input_dto.phone_number,
+        restaurant_name=restaurant_name,
+        booking_time=input_dto.booking_time,
+        confirmation_code=confirmation_code,
+        number_of_people=input_dto.number_of_people,
+    )
 
-    # send email to the user with the confirmation code
-    # await rmq.send_email(
+    # verify the booking status after 15 minutes
+    background_tasks.add_task(
+        tasks.delay_task,
+        BOOKING_CONFIRMATION_EXPIRE_SECONDS,
+        tasks.verify_booking_status,
+        booking_id=booking_id,
+        r_dao=r_dao,
+        w_dao=w_dao,
+        rmq=rmq,
+    )
 
     return dtos.DefaultCreatedResponse(
-        data=dtos.CreatedResponse(id=obj_id),
+        data=dtos.CreatedResponse(id=booking_id),
     )
 
 
 @booking_router.patch("/{confirmation_code}")
 async def confirm_booking(
     confirmation_code: str,
-    dao: daos.GetDAO,
+    r_dao: daos.GetDAORO,
+    w_dao: daos.GetDAO,
     redis: GetRedis,
+    rmq: GetRMQ,
+    background_tasks: BackgroundTasks,
 ) -> None:
     """Confirm a booking."""
 
-    redis_key = _redis_confirmation_key(confirmation_code)
-    booking_id = await redis.get(redis_key)
+    redis_key = utils.redis_confirmation_key(confirmation_code)
+    val = await redis.get(redis_key)
 
-    if not booking_id:
-        raise exceptions.Http404("Confirmation code not found.")
+    if not val:
+        raise exceptions.Http403("Invalid confirmation code, or expired.")
 
-    await dao.update(
-        id=UUID(booking_id),
-        update_dto=dtos.BookingUpdateDTO(status=BookingStatus.CONFIRMED),
+    booking_id = UUID(val.decode())
+
+    db_booking = await r_dao.filter_one(id=booking_id)
+
+    if db_booking is None:
+        raise exceptions.Http404("Booking not found.")
+
+    if db_booking.status != BookingStatus.PENDING:
+        raise exceptions.Http403("Cannot confirm non-pending booking.")
+
+    # TODO: get restaurant from restaurant service
+    restaurant_name = "Test Restaurant"
+
+    await w_dao.update(
+        id=booking_id,
+        update_dto=dtos.BookingUpdateDTO(
+            status=BookingStatus.CONFIRMED,
+        ),
     )
 
     await redis.delete(redis_key)
 
+    # notify the user that their booking has been confirmed
+    background_tasks.add_task(
+        rmq.send_confirmation_success_email,
+        email=db_booking.email,
+        full_name=db_booking.full_name,
+        phone_number=db_booking.phone_number,
+        restaurant_name=restaurant_name,
+        booking_time=db_booking.booking_time,
+        number_of_people=db_booking.number_of_people,
+    )
 
-base_router.include_router(booking_router)
+
+@booking_router.get("/{booking_id}")
+async def get_booking(
+    booking_id: UUID,
+    r_dao: daos.GetDAORO,
+) -> dtos.DataResponse[dtos.BookingDTO]:
+    """Get a booking."""
+
+    db_booking = await r_dao.filter_one(id=booking_id)
+
+    if db_booking is None:
+        raise exceptions.Http404("Booking not found.")
+
+    return dtos.DataResponse(
+        data=dtos.BookingDTO.model_validate(db_booking),
+    )
+
+
+@booking_router.get("")
+async def get_booking_list(
+    r_dao: daos.GetDAORO,
+    pagination: dtos.Pagination,
+) -> dtos.OffsetResults[dtos.BookingDTO]:
+    """Get bookings."""
+
+    results = await r_dao.get_offset_results(
+        out_dto=dtos.BookingDTO,
+        pagination=pagination,
+    )
+
+    return results
+
+
+base_router_v1.include_router(booking_router)
 
 
 #################
@@ -132,48 +257,51 @@ base_router.include_router(booking_router)
 #################
 
 
-@base_router.get("/health")
+@base_router_v1.get("/health")
 async def health_check() -> bool:
     """Return True if the service is healthy."""
+
     return True
 
 
-# Testing
+###############
+# Demo routes #
+###############
+
+demo_router = APIRouter(prefix="/demo")
 
 
-@base_router.post("/send-notification")
+@demo_router.post("/send-notification")
 async def send_notification(rmq: GetRMQ) -> bool:
     """Send a notification."""
 
-    await rmq.send_email("test", "test", "test")
+    await rmq.send_confirmation_email(
+        email="martin_laursen9@hotmail.com",
+        full_name="Martin Laursen",
+        restaurant_name="Applebee's",
+        booking_time=datetime.now(),
+        confirmation_code="AS3F2Z",
+        number_of_people=4,
+        phone_number="1234567890",
+    )
 
     return True
 
 
-@base_router.get("/db-test")
-async def test_db(dao: daos.GetDAO) -> str:
-    """Test the database connection."""
-    import datetime
+@demo_router.post("/demo-task")
+async def demo_task(
+    tts: int,
+    text: str,
+    background_tasks: BackgroundTasks,
+) -> None:
+    """Demo task."""
 
-    id = await dao.create(
-        input_dto=dtos.BookingInputDTO(
-            restaurant_id=uuid4(),
-            full_name="Martin Laursen",
-            email="martin@intree.com",
-            phone_number="12345678",
-            booking_date=(datetime.datetime.now() + datetime.timedelta(days=1)).date(),
-            number_of_people=3,
-            special_request="Test",
-        ),
+    background_tasks.add_task(
+        tasks.delay_task,
+        tts,
+        tasks.demo_task,
+        text,
     )
 
-    return str(id)
 
-
-@base_router.get("/db-test-read/{id}")
-async def test_db_read(id: UUID, dao: daos.GetDAORO) -> None:
-    """Test the database connection."""
-
-    booking = await dao.filter_one(id=id)
-
-    print(booking.__dict__)
+base_router_v1.include_router(demo_router)

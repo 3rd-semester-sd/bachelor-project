@@ -1,19 +1,17 @@
 from fastapi import Depends
 from db.db_dependencies import GetDBSessionRO, GetDBSession
 
-from typing import Annotated, Any, TypeVar
+from typing import Annotated, Any, Type, TypeVar
 from uuid import UUID, uuid4
 
 import sqlalchemy as sa
 
 
-from dtos import BookingInputDTO, BookingUpdateDTO
+from dtos import BookingInputDTO, BookingUpdateDTO, OffsetResults, PaginationParams
 from models import Booking
 from pydantic import BaseModel
 import datetime
-from sqlalchemy import orm
 
-import exceptions
 from datetime import timedelta
 from models import Base
 from enums import BookingStatus
@@ -23,9 +21,6 @@ Model = TypeVar("Model", bound=Base)
 InputDTO = TypeVar("InputDTO", bound=BaseModel)
 OutputDTO = TypeVar("OutputDTO", bound=BaseModel)
 
-LoadType = orm.interfaces.LoaderOption | orm.InstrumentedAttribute  # type: ignore
-# PaginationType = PaginationParams
-
 
 class BookingReadDAO:
     """Class for accessing Booking table READ."""
@@ -33,32 +28,8 @@ class BookingReadDAO:
     def __init__(self, session: GetDBSessionRO):
         self.session = session
 
-    async def get_by_id_or_error(
-        self,
-        id: UUID,
-        loads: list[LoadType] | None = None,
-        exception: Exception | None = None,
-    ) -> Booking:
-        """Get a record by ID."""
-
-        query = sa.select(Booking).where(Booking.id == id)
-
-        if loads:
-            query = self._eager_load(query, loads)
-
-        result = await self.session.execute(query)
-        obj = result.scalar_one_or_none()
-
-        if obj is None:
-            name = Booking.__name__
-            exception = exception or exceptions.Http404(f"{name} not found.")
-            raise exception
-
-        return obj
-
     async def filter_one(
         self,
-        loads: list[LoadType] | None = None,
         **filter_params: Any,
     ) -> Booking | None:
         """Get a record by filters."""
@@ -74,9 +45,6 @@ class BookingReadDAO:
             query = query.where(getattr(Booking, key) == value)
 
         query = query.limit(1)
-
-        if loads:
-            query = self._eager_load(query, loads)
 
         results = await self.session.execute(query)
         return results.scalar_one_or_none()
@@ -135,38 +103,25 @@ class BookingReadDAO:
         result = await self.session.execute(query)
         return result.scalar_one_or_none() is not None
 
-    # async def get_offset_results(
-    #     self,
-    #     out_dto: Type[OutputDTO],
-    #     pagination: PaginationType,
-    #     query: sa.sql.Select[tuple[Model]] | None = None,
-    # ) -> OffsetResults[OutputDTO]:
-    #     """Get offset paginated records."""
+    async def get_offset_results[
+        T: BaseModel,
+    ](
+        self,
+        out_dto: Type[T],
+        pagination: PaginationParams,
+        query: sa.sql.Select[tuple[Booking]] | None = None,
+    ) -> OffsetResults[T]:
+        """Get offset paginated records."""
 
-    #     if query is None:
-    #         query = sa.select(Booking)
+        if query is None:
+            query = sa.select(Booking)
 
-    #     query = query.offset(pagination.offset).limit(pagination.limit)
-    #     results = await self.session.execute(query)
+        query = query.offset(pagination.offset).limit(pagination.limit)
+        results = await self.session.execute(query)
 
-    #     return OffsetResults(
-    #         data=[out_dto.model_validate(row) for row in results.scalars()],
-    #     )
-
-    @staticmethod
-    def _eager_load(
-        query: sa.sql.Select[tuple[Model]],
-        loads: list[LoadType],
-    ) -> sa.sql.Select[tuple[Model]]:
-        """Eager load items to query."""
-
-        for load in loads:
-            if isinstance(load, orm.InstrumentedAttribute):
-                query = query.options(orm.joinedload(load))
-            else:
-                query = query.options(load)
-
-        return query
+        return OffsetResults(
+            data=[out_dto.model_validate(row) for row in results.scalars()],
+        )
 
 
 class BookingWriteDAO:
@@ -201,7 +156,10 @@ class BookingWriteDAO:
             sa.update(Booking)
             .where(Booking.id == id)
             .values(
-                **update_dto.model_dump(),
+                **update_dto.model_dump(
+                    exclude_none=True,
+                    exclude_unset=True,
+                ),
             )
         )
 

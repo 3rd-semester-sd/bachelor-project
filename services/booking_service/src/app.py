@@ -1,10 +1,14 @@
 # from services.rabbit.lifetime import init_rabbit, shutdown_rabbit
+from services.rabbit.lifetime import (
+    init_rabbit,
+    shutdown_rabbit,
+)
 from settings import settings
 
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from fastapi import FastAPI
-from routes import base_router
+from routes import base_router_v1
 from db import db_lifetime
 from services.redis import lifetime as redis_lifetime
 
@@ -18,14 +22,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     redis_lifetime.setup_redis(app)
 
-    # init_rabbit(app)
+    init_rabbit(app)
 
     yield
 
     await db_lifetime.shutdown_db_ro(app)
     await db_lifetime.shutdown_db(app)
 
-    # await shutdown_rabbit(app)
+    await shutdown_rabbit(app)
 
 
 def get_app() -> FastAPI:
@@ -35,7 +39,7 @@ def get_app() -> FastAPI:
     )
 
     app = FastAPI(lifespan=lifespan)
-    app.include_router(base_router)
+    app.include_router(base_router_v1)
     return app
 
 

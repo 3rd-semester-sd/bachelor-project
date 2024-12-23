@@ -1,10 +1,14 @@
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict
-from typing import Annotated, Generic, TypeVar
+from typing import Annotated
 from uuid import UUID
 import enums
 from fastapi import Depends
 from pydantic import Field
+
+from datetime import timezone
+from enums import NotificationType
+from pydantic import computed_field
 
 
 # Base
@@ -24,13 +28,10 @@ class PaginationParams(BaseModel):
     limit: int = Field(20, le=20, ge=1)
 
 
-DataT = TypeVar("DataT", bound=BaseModel)
-
-
-class OffsetResults(BaseModel, Generic[DataT]):
+class OffsetResults[T: BaseModel](BaseModel):
     """DTO for offset paginated response."""
 
-    data: list[DataT]
+    data: list[T]
 
 
 Pagination = Annotated[PaginationParams, Depends(PaginationParams)]
@@ -50,6 +51,12 @@ class DefaultCreatedResponse(BaseModel):
     data: CreatedResponse
     success: bool = True
     message: str | None = "Object was created!"
+
+
+class DataResponse[T: BaseModel](BaseModel):
+    """Default response model returning only data."""
+
+    data: T | None = None
 
 
 #############
@@ -84,3 +91,64 @@ class BookingUpdateDTO(BaseOrmModel):
 
 class BookingDTO(_BookingBaseDTO):
     """DTO for booking."""
+
+
+#################
+# RabbitMQ DTOs #
+#################
+
+
+class _BaseRMQPublishDTO(BaseModel):
+    """Base model for publishing messages."""
+
+    from_service: str = "booking_service"
+
+    @computed_field  # type: ignore
+    @property
+    def created_at(self) -> datetime:
+        """Get current datetime."""
+        return datetime.now(timezone.utc)
+
+
+class _BaseNotificationDTO(_BaseRMQPublishDTO):
+    """Base notification DTO."""
+
+    notification_type: NotificationType = NotificationType.BOOKING_CONFIRMATION
+
+
+class _BaseBookingPayload(BaseModel):
+    """Base booking payload."""
+
+    email: str
+    full_name: str
+    phone_number: str
+    restaurant_name: str
+    booking_time: datetime
+    number_of_people: int
+
+
+class BookingConfirmationPayload(_BaseBookingPayload):
+    """Booking confirmation payload."""
+
+    confirmation_code: str
+
+
+class BookingConfirmationSuccessPayload(_BaseBookingPayload):
+    """Booking confirmation success payload."""
+
+
+class BookingRejectionPayload(_BaseBookingPayload):
+    """Booking rejection payload."""
+
+
+BookingPayloadType = (
+    BookingConfirmationPayload
+    | BookingConfirmationSuccessPayload
+    | BookingRejectionPayload
+)
+
+
+class BookingEmailDTO[PayloadT: BookingPayloadType](_BaseNotificationDTO):
+    """Send booking email DTO, with payload."""
+
+    payload: PayloadT

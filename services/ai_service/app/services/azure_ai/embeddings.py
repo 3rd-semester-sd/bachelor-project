@@ -61,20 +61,36 @@ async def generate_restaurant_embedding(
 async def search_embedding(
     input_dto: UserRequestDTO,
     client: AsyncAzureOpenAI,
+    es_service: ElasticsearchService,
+    limit: int,
     model: str = settings.ai_embedding_azure_model,
-    limit: int = 2,
 ) -> list[RestaurantModelDTO] | None:
     """Search embedding using similarity search."""
+
     embedding = await _generate_embedding(
         input_dto.user_input, client=client, model=model
     )
+
     if embedding is None:
         logger.warning("Failed to generate user embedding for search.")
         return None
 
-    return None
+    if len(embedding) != 3072:
+        logger.error(
+            f"Embedding dimension mismatch: Expected 3072, got {len(embedding)}"
+        )
+
+    result = await es_service.similarity_search(embedding=embedding, limit=limit)
+    
     return (
-        [RestaurantModelDTO.model_validate(restaurant) for restaurant in result]
+        [
+            RestaurantModelDTO(
+                restaurant_id=restaurant["_id"],
+                description=restaurant["_source"]["restaurant_description"],
+                restaurant_name=restaurant["_source"]["restaurant_name"],
+            )
+            for restaurant in result
+        ]
         if result
         else None
     )

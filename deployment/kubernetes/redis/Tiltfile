@@ -1,0 +1,8 @@
+load("ext://helm_resource", "helm_resource", "helm_repo")
+
+helm_resource(
+    name="redis",
+    chart="bitnami/redis",
+    flags=["--values=./values.yaml"],
+)   
+

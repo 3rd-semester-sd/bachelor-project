@@ -91,6 +91,29 @@ class RabbitMQSettings(BaseSettings):
         )
 
 
+class RedisSettings(BaseSettings):
+    """Configuration for Redis."""
+
+    host: str = "redis-master"
+    port: int = 6379
+    password: SecretStr | None = None
+
+    @property
+    def url(self) -> URL:
+        """Redis URL."""
+        return URL.build(
+            scheme="redis",
+            host=self.host,
+            port=self.port,
+            # password=self.password.get_secret_value() if self.password else None,
+        )
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_prefix=f"{PREFIX}REDIS_",
+    )
+
+
 class Settings(BaseSettings):
     """Settings for the booking service."""
 
@@ -104,6 +127,8 @@ class Settings(BaseSettings):
     pg_ro: PGSettingsRO = PGSettingsRO()
 
     rabbit: RabbitMQSettings = RabbitMQSettings()
+
+    redis: RedisSettings = RedisSettings()
 
     model_config = SettingsConfigDict(
         env_file=DOTENV,

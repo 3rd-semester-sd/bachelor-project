@@ -42,5 +42,5 @@ class UserPrompt(UserRequestDTO):
             f"You are tasked with helping a user select a restaurant based on their query. "
             f"Here is a list of available restaurants:\n{restaurant_list}\n\n"
             f"The user asks: {self.user_input}"
-            f"Pæease respond in a joyful matter as if you were a waiter, but consise: {self.user_input}"
+            f"Please respond in a joyful matter as if you were a waiter, but be very concise: {self.user_input}"
         )

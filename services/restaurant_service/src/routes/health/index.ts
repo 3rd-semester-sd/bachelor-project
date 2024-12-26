@@ -7,7 +7,7 @@ export const route: BasePlugin = async (fastify, opts) => {
     method: "GET",
     url: "",
     schema: {
-      tags: ["Restaurant"],
+      tags: ["Health"],
       response: {
         200: defaultResponseDTO,
         500: z.object({ error: z.string() }),

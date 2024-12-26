@@ -1,6 +1,6 @@
 import { count, eq } from "drizzle-orm";
 import { BasePlugin } from "~/types/BasePlugin";
-import { restaurantsTable } from "~/db/schema";
+import { restaurantSettingsTable, restaurantsTable } from "~/db/schema";
 import {
   dataResponseDTO,
   defaultResponseDTO,
@@ -115,43 +115,48 @@ export const route: BasePlugin = async (fastify, opts) => {
     handler: async (req, res) => {
       try {
         // Insert into postgres
-        const result = await fastify.db
-          .insert(restaurantsTable)
-          .values(req.body)
-          .returning({ restaurant_id: restaurantsTable.restaurant_id });
+        const result: any[] = await fastify.db.transaction(async (tx) => {
+          const result_id = await tx
+            .insert(restaurantsTable)
+            .values(req.body)
+            .returning({ restaurant_id: restaurantsTable.restaurant_id });
 
-        // Add to elastic search
-        await fastify.elastic.index({
-          index: "restaurants",
-          id: result[0].restaurant_id,
-          document: req.body,
-        });
+          await tx.insert(restaurantSettingsTable).values({
+            restaurant_id: result_id[0].restaurant_id,
+            ...req.body.restaurant_settings,
+          });
+          // Add to elastic search
+          await fastify.elastic.index({
+            index: "restaurants",
+            id: result_id[0].restaurant_id,
+            document: req.body,
+          });
+          const msg = {
+            restaurant_id: result_id[0].restaurant_id,
+            description: req.body.restaurant_description,
+          };
 
-        const msg = {
-          restaurant_id: result[0].restaurant_id,
-          description: req.body.restaurant_description,
-        };
+          const msgBuffer = Buffer.from(JSON.stringify(msg));
 
-        const msgBuffer = Buffer.from(JSON.stringify(msg));
+          // Publish the message to the exchange
+          const exchangeName = "new_restaurant_exchange";
+          const routingKey = "";
 
-        // Publish the message to the exchange
-        const exchangeName = "new_restaurant_exchange";
-        const routingKey = "";
+          const publishResult = fastify.amqp.channel.publish(
+            exchangeName,
+            routingKey,
+            msgBuffer,
+            {
+              persistent: true,
+            }
+          );
 
-        const publishResult = fastify.amqp.channel.publish(
-          exchangeName,
-          routingKey,
-          msgBuffer,
-          {
-            persistent: true,
+          if (!publishResult) {
+            fastify.log.error("Failed to publish message to RabbitMQ exchange");
+            throw new Error("Failed to publish message to RabbitMQ exchange");
           }
-        );
-
-        if (!publishResult) {
-          fastify.log.error("Failed to publish message to RabbitMQ exchange");
-          throw new Error("Failed to publish message to RabbitMQ exchange");
-        }
-
+          return result_id;
+        });
         return res.status(200).send({ data: result[0].restaurant_id });
       } catch (e) {
         fastify.log.error(

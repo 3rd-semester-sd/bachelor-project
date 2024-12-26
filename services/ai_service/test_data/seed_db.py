@@ -20,12 +20,22 @@ class RestaurantInputDTO(BaseModel):
     description: str
 
 
+class RestaurantSettings(BaseModel):
+    max_seats: int = Field(default=30)
+    opening_hr: int = Field(default=10)
+    closing_hr: int = Field(default=22)
+    open_days: list[int] = Field(default=[1, 1, 1, 1, 1, 1, 0])
+    reservation_time_hr: int = Field(default=2)
+    closing_time_buffer_hr: int = Field(default=2)
+
+
 class RestaurantPostDTO(BaseModel):
     restaurant_name: str = Field(..., alias="restaurant_name")
     restaurant_description: str = Field(..., alias="restaurant_description")
     restaurant_address: str = Field(..., alias="restaurant_address")
     restaurant_location: str = Field(..., alias="restaurant_location")
     cuisine_type: str = Field(..., alias="cuisine_type")
+    restaurant_settings: RestaurantSettings = Field(default=RestaurantSettings())
 
 
 def load_restaurants_from_json(file_path: str) -> List[RestaurantInputDTO]:

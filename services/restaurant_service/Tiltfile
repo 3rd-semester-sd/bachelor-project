@@ -15,6 +15,6 @@ k8s_yaml(yaml)
 # )
 # k8s_yaml(postgres_yaml)
 
-# k8s_resource("restaurant-release-postgresql", port_forwards=5432)
+k8s_resource("restaurant-pg", port_forwards=5432)
 
 k8s_resource("restaurant", port_forwards=3000)

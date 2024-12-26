@@ -27,7 +27,7 @@ async def generate_chat_response(
                     "role": "system",
                     "content": "Assistant is a large language model trained by OpenAI.",
                 },
-                {"role": "user", "content": prompt.prompt},
+                {"role": "user", "content": prompt.prompt.strip()},
             ],
             temperature=temperature,
         )

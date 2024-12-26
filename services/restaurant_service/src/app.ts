@@ -76,14 +76,14 @@ fastify.register(dbPlugin, {
 });
 // elastic searcg
 fastify.register(fastifyElasticsearch, {
-  node: process.env.RESTAURANT_RABBIT_URL,
+  node: process.env.RESTAURANT_ES_URL,
 });
 
 fastify.register(fastifyAmqp, {
-  hostname: "localhost",
-  port: 5672,
-  username: "user",
-  password: "password",
+  hostname: process.env.RESTAURANT_RABBIT_HOSTNAME,
+  port: process.env.RESTAURANT_RABBIT_PORT,
+  username: process.env.RESTAURANT_RABBIT_USERNAME,
+  password: process.env.RESTAURANT_RABBIT_PASSWORD,
 });
 
 fastify.register(rabbitmqPlugin, {

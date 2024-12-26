@@ -9,12 +9,17 @@ env:
   ai_service_log_level: "info"
   ai_service_reload: "true"
   ai_database_url: "postgresql+asyncpg://postgres:postgres@ai-release-postgresql-primary:5432/pg-ai-service"
-  AI_OPENAI_AZURE_KEY: "FIgB5D8SRxuQaLKTzc92pFjwfs8eJfAAH5pUCigcl8J0xrbkXrqsJQQJ99AKACfhMk5XJ3w3AAABACOGGbGL"
-  AI_OPENAI_AZURE_ENDPOINT: "https://ai-skynet.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2024-08-01-preview"
-  AI_EMBEDDING_AZURE_KEY: "FIgB5D8SRxuQaLKTzc92pFjwfs8eJfAAH5pUCigcl8J0xrbkXrqsJQQJ99AKACfhMk5XJ3w3AAABACOGGbGL"
-  AI_EMBEDDING_AZURE_ENDPOINT: "https://ai-skynet.openai.azure.com/openai/deployments/text-embedding-3-large/embeddings?api-version=2023-05-15"
-  AI_EMBEDDING_AZURE_MODEL: "text-embedding-ada-002"
-  
+  ai_openai_azure_key: "FIgB5D8SRxuQaLKTzc92pFjwfs8eJfAAH5pUCigcl8J0xrbkXrqsJQQJ99AKACfhMk5XJ3w3AAABACOGGbGL"
+  ai_openai_azure_endpoint: "https://ai-skynet.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2024-08-01-preview"
+  ai_embedding_azure_key: "FIgB5D8SRxuQaLKTzc92pFjwfs8eJfAAH5pUCigcl8J0xrbkXrqsJQQJ99AKACfhMk5XJ3w3AAABACOGGbGL"
+  ai_embedding_azure_endpoint: "https://ai-skynet.openai.azure.com/openai/deployments/text-embedding-3-large/embeddings?api-version=2023-05-15"
+  ai_embedding_azure_model: "text-embedding-ada-002"
+  ai_elasticsearch_url: "http://elasticsearch:9200"
+  ai_rabbit_hostname: "rabbitmq"
+  ai_rabbit_port: 5672
+  ai_rabbit_username: "user"
+  ai_rabbit_password: "password"
+
 resources:
   requests:
     memory: "128Mi"
@@ -25,6 +30,3 @@ resources:
 
 autoscaling:
   enabled: true
-
-elasticsearch:
-  enabled: false

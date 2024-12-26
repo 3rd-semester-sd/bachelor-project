@@ -8,7 +8,12 @@ env:
   restaurant_service_workers: "1"
   restaurant_service_log_level: "info"
   restaurant_service_reload: "true"
-  restaurant_database_url: "postgresql://postgres:postgres@restaurant-pg-primary:5432/pg-restaurant-service"
+  restaurant_database_url: "postgresql://postgres:postgres@restaurant-pg:5432/pg-restaurant-service"
+  restaurant_es_url: "http://elasticsearch:9200"
+  restaurant_rabbit_hostname: "rabbitmq"
+  restaurant_rabbit_port: 5672
+  restaurant_rabbit_username: "user"
+  restaurant_rabbit_password: "password"
   node_env: "DEV"
 
 resources:
@@ -25,30 +30,10 @@ autoscaling:
 postgresql:
   enabled: true
   fullnameOverride: restaurant-pg
-  architecture: replication
+  architecture: standalone
   auth:
     postgresPassword: postgres
     username: postgres
     password: postgres
     database: pg-restaurant-service
 
-    replicationUsername: postgres_repl
-    replicationPassword: postgres_repl
-
-  readReplicas:
-    replicaCount: 1
-
-elasticsearch:
-  enabled: false
-  replicaCount: 0
-  minimumMasterNodes: 1
-  persistence:
-    enabled: true
-    size: 10Gi
-  resources:
-    limits:
-      cpu: 2
-      memory: 4Gi
-    requests:
-      cpu: 0.5
-      memory: 1Gi

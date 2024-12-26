@@ -7,6 +7,7 @@ import {
   index,
   uniqueIndex,
   pgEnum,
+  PgArray,
 } from "drizzle-orm/pg-core";
 import { CuisineType, enumToPgEnum, MenuCategory } from "~/db/enums";
 
@@ -57,7 +58,33 @@ export const menuItemTable = pgTable("menu_item", {
   category: menuCategoryPgEnum(),
 });
 
+export const restaurantSettingsTable = pgTable("restaurant_settings", {
+  restaurant_settings_id: uuid("restaurant_settings_id")
+    .primaryKey()
+    .defaultRandom(),
+
+  // Foreign key to the main restaurant table
+  restaurant_id: uuid("restaurant_id")
+    .notNull()
+    .references(() => restaurantsTable.restaurant_id),
+
+  max_seats: integer("max_seats").notNull().default(30),
+  opening_hr: integer("opening_hr").notNull().default(10),
+  closing_hr: integer("closing_hr").notNull().default(22),
+
+  open_days: integer("open_days")
+    .array()
+    .notNull()
+    .default([1, 1, 1, 1, 1, 1, 0]),
+
+  reservation_time_hr: integer("reservation_time_hr").notNull().default(2),
+  closing_time_buffer_hr: integer("closing_time_buffer_hr")
+    .notNull()
+    .default(2),
+});
+
 export type User = typeof usersTable.$inferInsert;
 export type Restaurant = typeof restaurantsTable.$inferInsert;
+export type RestaurantSetting = typeof restaurantSettingsTable.$inferInsert;
 export type Menu = typeof menuTable.$inferInsert;
 export type MenuItem = typeof menuItemTable.$inferInsert;

@@ -25,7 +25,7 @@ export const dbPlugin = fastifyPlugin<
   fastify.log.info(`[dbPlugin] Initializing db`);
   const db = await getDbClient(databaseUrl);
   await migrateDatabase(db);
-  await seedDatabaseTestData(db);
+  // await seedDatabaseTestData(db);
   fastify.decorate("db", db);
   fastify.db = db;
   fastify.log.info(`[dbPlugin] Initialized`);

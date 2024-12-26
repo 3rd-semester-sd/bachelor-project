@@ -187,28 +187,30 @@ export const route: BasePlugin = async (fastify, opts) => {
       const updateData = req.body;
 
       try {
-        const result = await fastify.db
-          .update(restaurantsTable)
-          .set(updateData)
-          .where(eq(restaurantsTable.restaurant_id, id))
-          .returning();
+        await fastify.db.transaction(async (tx) => {
+          const result = await tx
+            .update(restaurantsTable)
+            .set(updateData)
+            .where(eq(restaurantsTable.restaurant_id, id))
+            .returning();
 
-        if (result.length === 0) {
-          return res.status(404).send({ error: "No restaurant found." });
-        }
+          if (result.length === 0) {
+            return res.status(404).send({ error: "No restaurant found." });
+          }
 
-        // update the Elasticsearch document with partial update
-        try {
-          await fastify.elastic.update({
-            index: "restaurants",
-            id: id,
-            doc: updateData,
-          });
-        } catch (esError) {
-          return res
-            .status(500)
-            .send({ error: `ES update failed: ${esError}` });
-        }
+          // update the Elasticsearch document with partial update
+          try {
+            await fastify.elastic.update({
+              index: "restaurants",
+              id: id,
+              doc: updateData,
+            });
+          } catch (esError) {
+            return res
+              .status(500)
+              .send({ error: `ES update failed: ${esError}` });
+          }
+        });
         return res.status(200).send({ data: id });
       } catch (dbError) {
         return res.status(500).send({ error: `DB update failed: ${dbError}` });
@@ -232,27 +234,28 @@ export const route: BasePlugin = async (fastify, opts) => {
       const { id } = req.params;
 
       try {
-        const result = await fastify.db
-          .delete(restaurantsTable)
-          .where(eq(restaurantsTable.restaurant_id, id))
-          .returning();
+        await fastify.db.transaction(async (tx) => {
+          const result = await tx
+            .delete(restaurantsTable)
+            .where(eq(restaurantsTable.restaurant_id, id))
+            .returning();
 
-        if (result.length === 0) {
-          return res.status(404).send({ error: "No restaurant found." });
-        }
+          if (result.length === 0) {
+            return res.status(404).send({ error: "No restaurant found." });
+          }
 
-        // delete the document in Elasticsearch
-        try {
-          await fastify.elastic.delete({
-            index: "restaurants",
-            id: id,
-          });
-        } catch (esError) {
-          return res
-            .status(500)
-            .send({ error: `ES delete failed: ${esError}` });
-        }
-
+          // delete the document in Elasticsearch
+          try {
+            await fastify.elastic.delete({
+              index: "restaurants",
+              id: id,
+            });
+          } catch (esError) {
+            return res
+              .status(500)
+              .send({ error: `ES delete failed: ${esError}` });
+          }
+        });
         return res.status(200).send({ data: id });
       } catch (dbError) {
         return res.status(500).send({ error: `DB delete failed: ${dbError}` });

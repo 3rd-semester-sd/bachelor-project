@@ -16,8 +16,8 @@ async def health_check() -> bool:
     return True
 
 
-@base_router.get("/ready")
-async def readiness_check(request: Request) -> bool:
-    """Return True if the service is ready."""
+@base_router.get("/authsvc")
+async def test_authsvc(request: Request) -> bool:
+    """Test authsvc."""
     logger.info(f"Request: {request.headers}")
     return True

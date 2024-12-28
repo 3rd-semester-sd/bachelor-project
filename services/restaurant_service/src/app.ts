@@ -98,7 +98,7 @@ fastify.register(rabbitmqPlugin, {
 void fastify.register(AutoLoad, {
   dir: join(__dirname, "routes"),
   dirNameRoutePrefix: (folderParent, folderName) => {
-    return folderName.replace(/_/g, "-");
+    return folderName.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
   },
 });
 

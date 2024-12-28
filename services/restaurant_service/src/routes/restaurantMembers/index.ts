@@ -5,8 +5,8 @@ import {
   RestaurantMember,
   restaurantMemberDTO,
   restaurantMemberRequestDTO,
-} from "~/dtos/restaurant_member_dtos";
-import { paginationDTO } from "~/dtos/request_dtos";
+} from "~/dtos/restaurantMemberDTOs";
+import { paginationDTO } from "~/dtos/requestDTOs";
 import { z } from "zod";
 import { CRUDBase } from "~/utils/baseCRUD";
 

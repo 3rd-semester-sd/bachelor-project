@@ -4,12 +4,12 @@ import { restaurantSettingsTable, restaurantsTable } from "~/db/schema";
 import {
   restaurantRequestDTO,
   restaurantResponseDTO,
-} from "~/dtos/restaurant_dtos";
+} from "~/dtos/restaurantDTOs";
 import {
   dataResponseDTO,
   defaultResponseDTO,
   paginatedDataListResponseDTO,
-} from "~/dtos/response_dtos";
+} from "~/dtos/responseDTOs";
 import { eq } from "drizzle-orm";
 import { CRUDBase } from "./baseCRUD";
 

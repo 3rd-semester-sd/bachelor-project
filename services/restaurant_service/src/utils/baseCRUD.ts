@@ -1,13 +1,13 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { AnyColumn, eq } from "drizzle-orm";
 import { z } from "zod";
-import { paginationDTO } from "~/dtos/request_dtos";
-import { restaurantResponseDTO } from "~/dtos/restaurant_dtos";
+import { paginationDTO } from "~/dtos/requestDTOs";
+import { restaurantResponseDTO } from "~/dtos/restaurantDTOs";
 import {
   dataResponseDTO,
   defaultResponseDTO,
   paginatedDataListResponseDTO,
-} from "~/dtos/response_dtos";
+} from "~/dtos/responseDTOs";
 import { AnyPgTable } from "drizzle-orm/pg-core";
 
 type ResponseSchema = z.ZodObject<any>;

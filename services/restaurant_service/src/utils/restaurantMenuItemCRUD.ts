@@ -4,7 +4,7 @@ import { restaurantSettingsTable, restaurantsTable } from "~/db/schema";
 import {
   restaurantRequestDTO,
   restaurantResponseDTO,
-} from "~/dtos/restaurant_dtos";
+} from "~/dtos/restaurantDTOs";
 import { CRUDBase } from "./baseCRUD";
 
 export class RestaurantCRUD extends CRUDBase<

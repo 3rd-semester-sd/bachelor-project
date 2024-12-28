@@ -1,7 +1,7 @@
 from fastapi import Depends
 from db.db_dependencies import GetDBSessionRO, GetDBSession
 
-from typing import Annotated, Any, TypeVar
+from typing import Annotated, Any
 from uuid import UUID, uuid4
 
 import sqlalchemy as sa
@@ -9,14 +9,6 @@ import sqlalchemy as sa
 
 from dtos import BaseUserInputDTO
 from models import BaseUser
-from pydantic import BaseModel
-
-from models import Base
-
-
-Model = TypeVar("Model", bound=Base)
-InputDTO = TypeVar("InputDTO", bound=BaseModel)
-OutputDTO = TypeVar("OutputDTO", bound=BaseModel)
 
 
 class BaseUserReadDAO:

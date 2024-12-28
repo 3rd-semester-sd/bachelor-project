@@ -18,11 +18,11 @@ from state import state
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Lifespan."""
 
-    # await init_rabbit(state=state, settings=settings.rabbit)
+    await init_rabbit(state=state, settings=settings.rabbit)
 
     yield
 
-    # await shutdown_rabbit(state=state)
+    await shutdown_rabbit(state=state)
 
 
 def get_app() -> FastAPI:

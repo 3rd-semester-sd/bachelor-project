@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta, timezone
-from typing import Annotated, Any, Type, TypeVar
+from typing import Annotated, Any
 import dtos
 import jwt
-from pydantic import ValidationError
 import json
 from uuid import UUID
 import exceptions
@@ -12,7 +11,6 @@ import daos
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPBearer as _HTTPBearer
 
-from uuid import UUID
 
 ALGORITHM = "HS256"
 
@@ -20,7 +18,7 @@ CREATE_TOKEN_EXPIRE_MINUTES = 30
 
 
 class Encoder(json.JSONEncoder):
-    def default(self, obj: Any):
+    def default(self, obj: Any) -> Any:
         if isinstance(obj, UUID):
             return str(obj)
 

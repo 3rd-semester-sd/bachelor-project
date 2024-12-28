@@ -1,37 +1,34 @@
-from services.rabbit.lifetime import (
-    init_rabbit,
-    shutdown_rabbit,
-)
+from loguru import logger
 from settings import settings
 
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from fastapi import FastAPI
-from routes import base_router
-
-from loguru import logger
-
-from state import state
+from routes import router
+from db import db_lifetime
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Lifespan."""
 
-    # await init_rabbit(state=state, settings=settings.rabbit)
+    await db_lifetime.setup_db_ro(app)
+    await db_lifetime.setup_db(app)
 
     yield
 
-    # await shutdown_rabbit(state=state)
+    await db_lifetime.shutdown_db_ro(app)
+    await db_lifetime.shutdown_db(app)
 
 
 def get_app() -> FastAPI:
-    """Get FastAPI app."""
+
     logger.info(
         settings.model_dump_json(indent=2),
     )
+
     app = FastAPI(lifespan=lifespan)
-    app.include_router(base_router)
+    app.include_router(router)
     return app
 
 

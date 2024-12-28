@@ -15,11 +15,14 @@ class NotificationRequestDTO(BaseModel):
 
 
 class NotificationHandler(ABC):
-    handlers: ClassVar[dict[str, "type[NotificationHandler]"]] = {}
+    handlers: ClassVar[dict[str, type["NotificationHandler"]]] = {}
 
     def __init_subclass__(cls, notification_type: str) -> None:
+        if notification_type in cls.handlers:
+            raise ValueError(
+                f"Handler for notification type {notification_type} already exists"
+            )
         cls.handlers[notification_type] = cls
-        super().__init_subclass__()
 
     @classmethod
     def get_handler(
@@ -38,6 +41,7 @@ class BookingConfirmationHandler(
     NotificationHandler,
     notification_type=NotificationType.BOOKING_CONFIRMATION,
 ):
+
     async def handle(self, data: NotificationRequestDTO) -> None:
         """Handle booking confirmation notification."""
 

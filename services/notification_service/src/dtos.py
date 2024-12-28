@@ -13,10 +13,6 @@ class ComputedCreatedAt(BaseModel):
         return datetime.now(timezone.utc)
 
 
-class _BaseNotificationDTO(ComputedCreatedAt):
-    """Base model for publishing messages."""
-
-
 class EmailDTO(BaseModel):
     """Email data transfer object."""
 

@@ -1,8 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { AnyColumn, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { paginationDTO } from "~/dtos/requestDTOs";
-import { restaurantResponseDTO } from "~/dtos/restaurantDTOs";
 import {
   dataResponseDTO,
   defaultResponseDTO,
@@ -15,19 +14,39 @@ type RequestSchema = z.ZodObject<any>;
 
 export class CRUDBase<
   M extends AnyPgTable,
-  T extends ResponseSchema,
-  R extends RequestSchema,
+  T extends RequestSchema,
+  R extends ResponseSchema,
 > {
   constructor(
     protected fastify: FastifyInstance,
     protected table: M,
     protected esIndex: string,
     protected idField: string,
-    protected responseDTO: T,
-    protected requestDTO: R,
+    protected requestDTO: T,
+    protected responseDTO: R,
     protected tags: string[]
   ) {}
-
+  /**
+   * Hook that runs *after* successfully creating a record in DB.
+   * By default, it does nothing. Derived classes can override this.
+   */
+  protected async onAfterCreate(
+    insertedId: string,
+    insertedData: Partial<M["$inferInsert"]>,
+    req: FastifyRequest
+  ): Promise<void> {
+    // no-op in base class
+  }
+  protected async onAfterDelete(insertedId: string): Promise<void> {
+    // no-op in base class
+  }
+  protected async onAfterUpdate(
+    insertedId: string,
+    insertedData: Partial<M["$inferInsert"]>,
+    req: FastifyRequest
+  ): Promise<void> {
+    // no-op in base class
+  }
   async handleGetAll(
     req: FastifyRequest<{ Querystring: { page: number; page_size: number } }>,
     res: FastifyReply
@@ -79,7 +98,7 @@ export class CRUDBase<
   async handleCreate(req: FastifyRequest, res: FastifyReply) {
     try {
       const result = await this.fastify.db.transaction(async (tx) => {
-        const result_id = await tx
+        const inserted = await tx
           .insert(this.table)
           .values(req.body as M["$inferInsert"])
           .returning({
@@ -88,13 +107,17 @@ export class CRUDBase<
             ],
           });
 
+        const insertedId = inserted[0][this.idField];
+
         await this.fastify.elastic.index({
           index: this.esIndex,
-          id: result_id[0][this.idField],
+          id: insertedId,
           document: req.body,
         });
 
-        return result_id;
+        await this.onAfterCreate(insertedId, inserted, req);
+
+        return inserted;
       });
 
       return res.status(200).send({ data: result[0][this.idField] });
@@ -134,6 +157,8 @@ export class CRUDBase<
           id: id,
           doc: updateData,
         });
+
+        await this.onAfterUpdate(id, result, req);
       });
       return res.status(200).send({ data: id });
     } catch (e) {
@@ -149,21 +174,23 @@ export class CRUDBase<
 
     try {
       await this.fastify.db.transaction(async (tx) => {
-        const result = await tx
-          .delete(this.table)
-          .where(
-            eq((this.table as unknown as Record<string, any>)[this.idField], id)
-          )
-          .returning();
+        // const result = await tx
+        //   .delete(this.table)
+        //   .where(
+        //     eq((this.table as unknown as Record<string, any>)[this.idField], id)
+        //   )
+        //   .returning();
 
-        if (result.length === 0) {
-          return res.status(404).send({ error: `No ${this.esIndex} found.` });
-        }
+        // if (result.length === 0) {
+        //   return res.status(404).send({ error: `No ${this.esIndex} found.` });
+        // }
 
-        await this.fastify.elastic.delete({
-          index: this.esIndex,
-          id: id,
-        });
+        // await this.fastify.elastic.delete({
+        //   index: this.esIndex,
+        //   id: id,
+        // });
+
+        await this.onAfterDelete(id);
       });
       return res.status(200).send({ data: id });
     } catch (e) {

@@ -37,7 +37,10 @@ export const restaurantsTable = pgTable(
   {
     restaurant_id: uuid().primaryKey().defaultRandom(),
     member_id: uuid()
-      .references(() => restaurantMembersTable.member_id)
+      .references(() => restaurantMembersTable.member_id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      })
       .notNull(),
     restaurant_name: varchar({ length: 255 }).notNull(),
     restaurant_address: varchar({ length: 255 }).notNull(),
@@ -58,14 +61,20 @@ export const restaurantsTable = pgTable(
 
 export const menusTable = pgTable("menus", {
   menu_id: uuid().primaryKey().defaultRandom(),
-  restaurant_id: uuid().references(() => restaurantsTable.restaurant_id),
+  restaurant_id: uuid().references(() => restaurantsTable.restaurant_id, {
+    onDelete: "cascade",
+    onUpdate: "cascade",
+  }),
   menu_name: varchar({ length: 255 }).notNull(),
   menu_description: varchar({ length: 255 }).notNull(),
 });
 
 export const menuItemsTable = pgTable("menu_items", {
   item_id: uuid().primaryKey().defaultRandom(),
-  menu_id: uuid().references(() => menusTable.menu_id),
+  menu_id: uuid().references(() => menusTable.menu_id, {
+    onDelete: "cascade",
+    onUpdate: "cascade",
+  }),
   item_name: varchar({ length: 255 }).notNull(),
   item_description: varchar({ length: 255 }).notNull(),
   // TODO: price behaves weird
@@ -79,7 +88,10 @@ export const restaurantSettingsTable = pgTable("restaurant_settings", {
     .defaultRandom(),
   restaurant_id: uuid("restaurant_id")
     .notNull()
-    .references(() => restaurantsTable.restaurant_id),
+    .references(() => restaurantsTable.restaurant_id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
   max_seats: integer("max_seats").notNull().default(30),
   opening_hr: integer("opening_hr").notNull().default(10),
   closing_hr: integer("closing_hr").notNull().default(22),

@@ -6,20 +6,13 @@ import {
   restaurantMenuRequestDTO,
 } from "~/dtos/restaurantMenuDTOs";
 import { CRUDBase } from "~/utils/baseCRUD";
+import { RestaurantMenuCRUD } from "~/utils/restaurantMenuCRUD";
 
 export const route: BasePlugin = async (fastify, opts) => {
-  const restaurantMembersCRUD = new CRUDBase<RestaurantMenu>(
-    fastify,
-    menusTable,
-    "restaurant_menu",
-    "menu_id",
-    restaurantMenuDTO,
-    restaurantMenuRequestDTO,
-    ["Restaurant Menu"]
-  );
+  const restaurantMenuCRUD = new RestaurantMenuCRUD(fastify);
 
   // register standard CRUD routes
-  restaurantMembersCRUD.registerRoutes();
+  restaurantMenuCRUD.registerRoutes();
 
   // add custom routes
 };

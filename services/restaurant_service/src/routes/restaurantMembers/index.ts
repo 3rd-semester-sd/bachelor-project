@@ -10,15 +10,15 @@ import { CRUDBase } from "~/utils/baseCRUD";
 export const route: BasePlugin = async (fastify, opts) => {
   const restaurantMembersCRUD = new CRUDBase<
     typeof restaurantMembersTable,
-    typeof restaurantMemberDTO,
-    typeof restaurantMemberRequestDTO
+    typeof restaurantMemberRequestDTO,
+    typeof restaurantMemberDTO
   >(
     fastify,
     restaurantMembersTable,
     "restaurant_members",
     "member_id",
-    restaurantMemberDTO,
     restaurantMemberRequestDTO,
+    restaurantMemberDTO,
     ["Restaurant member"]
   );
 

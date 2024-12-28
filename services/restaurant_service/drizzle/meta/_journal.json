@@ -15,6 +15,13 @@
       "when": 1735233187943,
       "tag": "0001_colorful_the_call",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1735397906430,
+      "tag": "0002_sleepy_kat_farrell",
+      "breakpoints": true
     }
   ]
 }

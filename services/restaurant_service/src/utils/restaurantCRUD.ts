@@ -5,18 +5,13 @@ import {
   restaurantRequestDTO,
   restaurantResponseDTO,
 } from "~/dtos/restaurantDTOs";
-import {
-  dataResponseDTO,
-  defaultResponseDTO,
-  paginatedDataListResponseDTO,
-} from "~/dtos/responseDTOs";
-import { eq } from "drizzle-orm";
 import { CRUDBase } from "./baseCRUD";
+import { RestaurantMenu } from "~/dtos/restaurantMenuDTOs";
 
 export class RestaurantCRUD extends CRUDBase<
   typeof restaurantsTable,
-  typeof restaurantResponseDTO,
-  typeof restaurantRequestDTO
+  typeof restaurantRequestDTO,
+  typeof restaurantResponseDTO
 > {
   constructor(fastify: FastifyInstance) {
     super(
@@ -24,14 +19,14 @@ export class RestaurantCRUD extends CRUDBase<
       restaurantsTable,
       "restaurants",
       "restaurant_id",
-      restaurantResponseDTO,
       restaurantRequestDTO,
+      restaurantResponseDTO,
       ["Restaurant"]
     );
   }
 
   /**
-   * Override handleCreate:
+   * Override handleCreate, to keep everything in one transaction:
    * - Insert into restaurant_settings
    * - Publish RabbitMQ message
    */
@@ -44,7 +39,7 @@ export class RestaurantCRUD extends CRUDBase<
 
       // Start transaction
       const result = await db.transaction(async (tx) => {
-        // 1) Insert into main "restaurants" table (same logic as base):
+        // 1) Insert into main "restaurants" table:
         const inserted = await tx
           .insert(this.table)
           .values(req.body)
@@ -104,6 +99,46 @@ export class RestaurantCRUD extends CRUDBase<
       return res
         .status(500)
         .send({ error: `something went wrong: ${(e as Error).message}` });
+    }
+  }
+  protected async onAfterDelete(deletedId: string): Promise<void> {
+    // delete menu related to restaurant
+
+    const esResult = await this.fastify.elastic.search({
+      index: "restaurant_menu",
+      query: {
+        match: {
+          restaurant_id: deletedId,
+        },
+      },
+    });
+
+    for (const result of esResult.hits.hits) {
+      await this.fastify.elastic.deleteByQuery({
+        index: "restaurant_menu",
+        body: {
+          query: {
+            match: {
+              restaurant_id: result._source.restaurant_id,
+            },
+          },
+        },
+      });
+      if (result._source.menu_items) {
+        const menu_items = result._source.menu_items;
+        for (const item of menu_items) {
+          await this.fastify.elastic.deleteByQuery({
+            index: "restaurant_menu_items",
+            body: {
+              query: {
+                match: {
+                  menu_id: item.menu_id,
+                },
+              },
+            },
+          });
+        }
+      }
     }
   }
 }

@@ -1,26 +1,11 @@
 import { BasePlugin } from "~/types/BasePlugin";
-import { menusTable } from "~/db/schema";
-import {
-  RestaurantMenu,
-  restaurantMenuDTO,
-  restaurantMenuRequestDTO,
-} from "~/dtos/restaurantMenuDTOs";
-import { CRUDBase } from "~/utils/baseCRUD";
-import { RestaurantMenuItem } from "~/dtos/restaurantMenuItemDTOs";
+import { RestaurantMenuItemCRUD } from "~/utils/restaurantMenuItemCRUD";
 
 export const route: BasePlugin = async (fastify, opts) => {
-  const restaurantMembersCRUD = new CRUDBase<RestaurantMenuItem>(
-    fastify,
-    menusTable,
-    "restaurant_menu",
-    "menu_id",
-    restaurantMenuDTO,
-    restaurantMenuRequestDTO,
-    ["Restaurant Menu Item"]
-  );
+  const restaurantMenuItemCRUD = new RestaurantMenuItemCRUD(fastify);
 
   // register standard CRUD routes
-  restaurantMembersCRUD.registerRoutes();
+  restaurantMenuItemCRUD.registerRoutes();
 
   // add custom routes
 };

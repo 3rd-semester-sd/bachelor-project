@@ -6,7 +6,7 @@ export const restaurantMenuItemDTO = z.object({
   menu_id: z.string().uuid(),
   item_name: z.string(),
   item_description: z.string(),
-  price: z.number(),
+  price: z.string(),
   category: z.nativeEnum(MenuCategory),
 });
 

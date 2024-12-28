@@ -6,6 +6,7 @@ import {
   restaurantMenuRequestDTO,
 } from "~/dtos/restaurantMenuDTOs";
 import { CRUDBase } from "~/utils/baseCRUD";
+import { RestaurantMenuItem } from "~/dtos/restaurantMenuItemDTOs";
 
 export const route: BasePlugin = async (fastify, opts) => {
   const restaurantMembersCRUD = new CRUDBase<RestaurantMenuItem>(

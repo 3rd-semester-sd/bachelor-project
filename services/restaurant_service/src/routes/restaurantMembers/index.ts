@@ -2,16 +2,17 @@ import { count, eq } from "drizzle-orm";
 import { BasePlugin } from "~/types/BasePlugin";
 import { restaurantMembersTable } from "~/db/schema";
 import {
-  RestaurantMember,
   restaurantMemberDTO,
   restaurantMemberRequestDTO,
 } from "~/dtos/restaurantMemberDTOs";
-import { paginationDTO } from "~/dtos/requestDTOs";
-import { z } from "zod";
 import { CRUDBase } from "~/utils/baseCRUD";
 
 export const route: BasePlugin = async (fastify, opts) => {
-  const restaurantMembersCRUD = new CRUDBase<RestaurantMember>(
+  const restaurantMembersCRUD = new CRUDBase<
+    typeof restaurantMembersTable,
+    typeof restaurantMemberDTO,
+    typeof restaurantMemberRequestDTO
+  >(
     fastify,
     restaurantMembersTable,
     "restaurant_members",

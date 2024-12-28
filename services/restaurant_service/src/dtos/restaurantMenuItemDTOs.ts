@@ -14,4 +14,4 @@ export const restaurantMenuItemRequestDTO = restaurantMenuItemDTO.omit({
   item_id: true,
 });
 
-export type RestaurantMenuItem = z.infer<typeof restaurantMenuItemDTO>;
+export type RestaurantMenuItem = z.infer<typeof restaurantMenuItemRequestDTO>;

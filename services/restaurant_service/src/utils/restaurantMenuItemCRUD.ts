@@ -7,7 +7,7 @@ import {
 } from "~/dtos/restaurantDTOs";
 import { CRUDBase } from "./baseCRUD";
 
-export class RestaurantCRUD extends CRUDBase<
+export class RestaurantMenuItemCRUD extends CRUDBase<
   typeof restaurantsTable,
   typeof restaurantResponseDTO,
   typeof restaurantRequestDTO
@@ -16,11 +16,11 @@ export class RestaurantCRUD extends CRUDBase<
     super(
       fastify,
       restaurantsTable,
-      "restaurants",
+      "restaurant_menu_items",
       "restaurant_id",
       restaurantResponseDTO,
       restaurantRequestDTO,
-      ["Restaurant"]
+      ["Restaurant Menu Item"]
     );
   }
 

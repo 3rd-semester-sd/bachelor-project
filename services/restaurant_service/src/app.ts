@@ -49,7 +49,7 @@ fastify.register(fastifySwaggerUI, {
       : undefined,
 
   uiConfig: {
-    docExpansion: "full",
+    docExpansion: "list",
     deepLinking: false,
   },
   uiHooks: {
@@ -97,6 +97,9 @@ fastify.register(rabbitmqPlugin, {
 // define your routes in one of these
 void fastify.register(AutoLoad, {
   dir: join(__dirname, "routes"),
+  dirNameRoutePrefix: (folderParent, folderName) => {
+    return folderName.replace(/_/g, "-");
+  },
 });
 
 export const app = fastify.withTypeProvider<ZodTypeProvider>();

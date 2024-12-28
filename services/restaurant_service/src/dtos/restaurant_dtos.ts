@@ -10,6 +10,7 @@ export const restaurantSettingDTO = z.object({
 });
 
 export const restaurantResponseDTO = z.object({
+  member_id: z.string().uuid(),
   restaurant_id: z.string().uuid(),
   restaurant_name: z.string().max(255),
   restaurant_description: z.string().max(5120),
@@ -20,10 +21,12 @@ export const restaurantResponseDTO = z.object({
   // embedding: z.array(z.number()).optional().nullable(),
 });
 
-export const restaurantRequestDTO = restaurantResponseDTO.omit({
-  restaurant_id: true,
-  // embedding: true,
-});
+export const restaurantRequestDTO = restaurantResponseDTO
+  .omit({
+    restaurant_id: true,
+    // embedding: true,
+  })
+  .extend({ member_id: z.string().uuid() });
 
 export type RestaurantSettingDTO = z.infer<typeof restaurantSettingDTO>;
 export type RestaurantResponseDTO = z.infer<typeof restaurantResponseDTO>;

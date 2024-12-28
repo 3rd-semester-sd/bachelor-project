@@ -16,7 +16,7 @@
    ```
 
 
-(Windows) Martin rebuild Lua scripts
+(Windows) Mart n rebuild Lua scripts
 ```
-k delete configmap custom-keycloak-jwt && tilt down && while kga | grep -q "pod"; do sleep 2; done && tilt up
+k delete configmap custom-authsvc-jwt && tilt down && while kga | grep -q "pod"; do sleep 2; done && tilt up
 ```

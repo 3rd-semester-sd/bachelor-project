@@ -1,11 +1,17 @@
-from enum import Enum, auto
+from enum import StrEnum, auto
 
 
-class BookingStatus(Enum):
+class BookingStatus(StrEnum):
     """Booking status enum."""
 
     PENDING = auto()
     CONFIRMED = auto()
-    CANCELED = auto()
-    COMPLETED = auto()
     REJECTED = auto()
+
+
+class NotificationType(StrEnum):
+    """Notification type enum."""
+
+    BOOKING_CONFIRMATION = auto()
+    BOOKING_CONFIRMATION_SUCCESS = auto()
+    BOOKING_REJECTION = auto()

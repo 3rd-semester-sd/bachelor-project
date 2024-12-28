@@ -16,5 +16,7 @@ ingressController:
 gateway:
   plugins:
     configMaps:
-    - name: custom-keycloak-jwt
-      pluginName: custom-keycloak-jwt
+    - name: custom-authsvc-jwt
+      pluginName: custom-authsvc-jwt
+    # - name: custom-keycloak-jwt
+    #   pluginName: custom-keycloak-jwt

@@ -1,21 +1,8 @@
-from fastapi import APIRouter
-
-base_router = APIRouter()
-
-
-##################
-# Booking routes #
-##################
+from fastapi import APIRouter, Request
+from loguru import logger
 
 
-booking_router = APIRouter(prefix="/booking")
-
-
-@booking_router.post("")
-async def create_booking() -> None: ...
-
-
-base_router.include_router(booking_router)
+base_router = APIRouter(prefix="/api")
 
 
 #################
@@ -26,4 +13,11 @@ base_router.include_router(booking_router)
 @base_router.get("/health")
 async def health_check() -> bool:
     """Return True if the service is healthy."""
+    return True
+
+
+@base_router.get("/authsvc")
+async def test_authsvc(request: Request) -> bool:
+    """Test authsvc."""
+    logger.info(f"Request: {request.headers}")
     return True

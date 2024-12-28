@@ -1,4 +1,4 @@
-docker_build("booking-image", ".", dockerfile="./Dockerfile")
+docker_build("notification-image", ".", dockerfile="./Dockerfile")
 
 yaml = helm(
     "../../deployment/charts/base",
@@ -8,4 +8,4 @@ yaml = helm(
 k8s_yaml(yaml)
 
 
-k8s_resource("notificationservice", port_forwards=8001)
+k8s_resource("notification-service", port_forwards=8001)

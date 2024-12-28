@@ -1,29 +1,10 @@
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: http-route
-  annotations:
-    konghq.com/strip-path: "true"
-    konghq.com/plugins: rate-limit, custom-keycloak-jwt
-spec:
-  parentRefs:
-  - name: kong
-  rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /booking-service
-    backendRefs:
-    - name: booking
-      kind: Service
-      port: 80
----
 # apiVersion: gateway.networking.k8s.io/v1
 # kind: HTTPRoute
 # metadata:
-#   name: http-route
+#   name: http-route-booking
 #   annotations:
 #     konghq.com/strip-path: "true"
+#     konghq.com/plugins: rate-limit, custom-keycloak-jwt
 # spec:
 #   parentRefs:
 #   - name: kong
@@ -31,9 +12,66 @@ spec:
 #   - matches:
 #     - path:
 #         type: PathPrefix
-#         value: /keycloak
+#         value: /booking-service
 #     backendRefs:
-#     - name: keycloak
+#     - name: booking
 #       kind: Service
 #       port: 80
-
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: http-route-notification-public
+  annotations:
+    konghq.com/strip-path: "true"
+spec:
+  parentRefs:
+  - name: kong
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /notification-service
+    backendRefs:
+    - name: notification-service
+      kind: Service
+      port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: http-route-notification-protected
+  annotations:
+    konghq.com/strip-path: "true"
+    konghq.com/plugins: custom-authsvc-jwt
+spec:
+  parentRefs:
+  - name: kong
+  rules:
+  - matches:
+    - path:
+        type: Exact
+        value: /notification-service/api/authsvc
+    backendRefs:
+    - name: notification-service
+      kind: Service
+      port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: http-route-auth
+  annotations:
+    konghq.com/strip-path: "true"
+spec:
+  parentRefs:
+  - name: kong
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /auth-service
+    backendRefs:
+    - name: notification-service
+      kind: Service
+      port: 80

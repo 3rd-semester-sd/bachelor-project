@@ -12,7 +12,6 @@ def init_rabbit(app: FastAPI) -> None:  # pragma: no cover
         """Creates connection to RabbitMQ using url from settings."""
         return await aio_pika.connect_robust(str(settings.rabbit.url))
 
-    # This pool is used to open connections.
     connection_pool: Pool[AbstractRobustConnection] = Pool(
         get_connection,
         max_size=settings.rabbit.rabbit_pool_size,
@@ -23,7 +22,6 @@ def init_rabbit(app: FastAPI) -> None:  # pragma: no cover
         async with connection_pool.acquire() as connection:
             return await connection.channel()
 
-    # This pool is used to open channels.
     channel_pool: Pool[aio_pika.Channel] = Pool(
         get_channel,
         max_size=settings.rabbit.rabbit_channel_pool_size,

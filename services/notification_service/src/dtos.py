@@ -1,7 +1,6 @@
-import uuid
 from datetime import datetime, timezone
 
-from pydantic import BaseModel, ConfigDict, Field, computed_field
+from pydantic import BaseModel, computed_field
 
 
 class ComputedCreatedAt(BaseModel):
@@ -14,5 +13,10 @@ class ComputedCreatedAt(BaseModel):
         return datetime.now(timezone.utc)
 
 
-class _BaseNotificationDTO(ComputedCreatedAt):
-    """Base model for publishing messages."""
+class EmailDTO(BaseModel):
+    """Email data transfer object."""
+
+    email: str
+    subject: str
+    body: str
+    html: str | None = None

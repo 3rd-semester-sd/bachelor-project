@@ -1,6 +1,10 @@
+# local_resource(
+#     name="create-custom-keycloak-jwt-configmap",
+#     serve_cmd="kubectl create configmap custom-keycloak-jwt --from-file=./custom-plugins/custom-keycloak-jwt",
+# )
 local_resource(
-    name="create-custom-keycloak-jwt-configmap",
-    serve_cmd="kubectl create configmap custom-keycloak-jwt --from-file=./custom-plugins/custom-keycloak-jwt",
+    name="create-custom-authsvc-jwt-configmap",
+    serve_cmd="kubectl create configmap custom-authsvc-jwt --from-file=./custom-plugins/custom-authsvc-jwt",
 )
 load("ext://helm_resource", "helm_resource", "helm_repo")
 

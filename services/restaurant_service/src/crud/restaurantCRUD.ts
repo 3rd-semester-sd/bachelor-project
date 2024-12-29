@@ -6,7 +6,6 @@ import {
   restaurantResponseDTO,
 } from "~/dtos/restaurantDTOs";
 import { CRUDBase } from "./baseCRUD";
-import { RestaurantMenu } from "~/dtos/restaurantMenuDTOs";
 
 export class RestaurantCRUD extends CRUDBase<
   typeof restaurantsTable,
@@ -65,6 +64,7 @@ export class RestaurantCRUD extends CRUDBase<
         // 4) Publish RabbitMQ message:
         const msg = {
           restaurant_id: newRestaurantId,
+          restaurant_name: req.body.restaurant_name,
           description: req.body.restaurant_description,
           saga_id: newRestaurantId,
           timestamp: new Date().toISOString(),

@@ -40,19 +40,19 @@ class RMQService:
         Function that handles incoming messages from the queue.
         When a message is received, it gets parsed then processed,
         further in the embedding function.
+
+        If the embedding succeeds a message is published to `embedding_result_exchange`,
+        informing the consumer if the embedding operation succeded or failed.
         """
 
         async with message.process():
             body_str = message.body.decode("utf-8")
             data = RestaurantRabbitInputDTO.model_validate_json(body_str)
             try:
-                print(f"Received message: {data}")
-
                 # generate embedding based on input
                 await generate_restaurant_embedding(
                     data, self.ai_client, self.es_service
                 )
-
                 # publish success
                 data.result = "success"
                 await self.publish_result(data=data)

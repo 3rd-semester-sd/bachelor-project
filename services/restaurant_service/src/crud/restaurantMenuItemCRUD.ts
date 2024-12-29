@@ -1,5 +1,5 @@
 // restaurantMenuItemCRUD.ts
-import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import { FastifyInstance, FastifyRequest } from "fastify";
 import { menuItemsTable } from "~/db/schema";
 import { CRUDBase } from "./baseCRUD";
 import {

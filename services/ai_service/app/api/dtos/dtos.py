@@ -3,46 +3,60 @@ from pydantic import BaseModel, Field
 
 
 class UserRequestDTO(BaseModel):
+    """DTO for user request."""
+
     user_input: str
 
 
 class RestaurantInputDTO(BaseModel):
+    """DTO for restaurant."""
+
     restaurant_id: str
     description: str
+    restaurant_name: str
 
 
 class RestaurantRabbitStatusDTO(BaseModel):
+    """DTO for RabbitMQ status, where result can be set."""
+
     saga_id: str
     time_stamp: datetime = Field(default_factory=datetime.now)
     result: str = "Failed"
     error: str | None = None
 
 
-class RestaurantRabbitInputDTO(RestaurantInputDTO, RestaurantRabbitStatusDTO): ...
+class RestaurantRabbitInputDTO(RestaurantInputDTO, RestaurantRabbitStatusDTO):
+    """DTO for the input, used by embedding and rabbitMQ services."""
 
-
-class RestaurantModelDTO(RestaurantInputDTO):
-    restaurant_name: str
+    ...
 
 
 class RestaurantEmbeddingDTO(RestaurantInputDTO):
+    """DTO for the embedding and restaurant result."""
+
     embedding: list[float]
 
 
 class RestaurantEmbeddingInputDTO(RestaurantInputDTO):
+    """DTO for embedding result."""
+
     embedding: list[float]
 
 
 class RestaurantSearchDTO(RestaurantInputDTO):
+    """DTO for a list of restaurant inputs."""
+
     restaurants: list[RestaurantInputDTO]
 
 
 class UserPrompt(UserRequestDTO):
-    restaurants: list[RestaurantModelDTO]
+    """Model to hold and generate the user prompts."""
+
+    restaurants: list[RestaurantInputDTO]
 
     @property
     def prompt(self):
-        # Format restaurant names into a bullet-point list
+        # Format restaurant names and descriptions into a bullet-point list
         restaurant_list = "\n".join(
             [
                 f"- {restaurant.restaurant_name} - {restaurant.description.strip()}"

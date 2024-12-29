@@ -21,22 +21,20 @@ class ElasticsearchService:
     ) -> None:
         self.es_client = es_client
 
-    async def get_info(self):
-        mapping = await self.es_client.indices.get_mapping(index="restaurants")
-        print(mapping)
-
     async def update_restaurant(
         self,
         restaurant_id: str,
         embedding: list[float],
     ) -> None:
+        """Updates a restaurant in elastic search with a given embedding."""
+
         doc = {"embedding": embedding}
         await self.es_client.update(
             index="restaurants", id=restaurant_id, body={"doc": doc}
         )
 
     async def similarity_search(self, embedding: list[float], limit: int = 1):
-        """Performs a similarity seach using elastic search."""
+        """Performs a similarity search using elastic search."""
 
         query: dict[str, Any] = {
             "size": limit,
@@ -66,8 +64,7 @@ class ElasticsearchService:
         if not hits:
             logger.info("No matching embeddings found in Elasticsearch.")
             return None
-        
-        print(len(hits), "hiiiits")
+
         # Extract the source documents from hits
         return [hit for hit in hits]
 

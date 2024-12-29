@@ -1,9 +1,6 @@
-// plugins/rabbitmqPlugin.ts
-
 import { FastifyInstance, FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
 import { Channel } from "amqplib";
-import { da } from "@faker-js/faker/.";
 import { restaurantsTable } from "~/db/schema";
 import { eq } from "drizzle-orm";
 import { RestaurantStatus } from "~/db/enums";
@@ -16,7 +13,7 @@ export type RabbitMQInitializerOptions = {
   durable?: boolean;
   shouldConsume?: boolean;
 };
-/// Initialize rabbitmq, to ensure bot the exchange and queue are created
+// Initialize rabbitmq, to ensure both the exchange and queue are created
 const rabbitmqInitializer: FastifyPluginAsync<RabbitMQInitializerOptions> = fp(
   async (fastify: FastifyInstance, options: RabbitMQInitializerOptions) => {
     const {

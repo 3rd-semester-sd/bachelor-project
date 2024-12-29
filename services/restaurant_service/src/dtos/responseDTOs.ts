@@ -38,8 +38,6 @@ export const defaultResponseDTO = z.object({
 });
 
 
-
-
 export type DataResponseDTO<T extends z.ZodTypeAny> = z.infer<
   ReturnType<typeof dataResponseDTO<T>>
 >;

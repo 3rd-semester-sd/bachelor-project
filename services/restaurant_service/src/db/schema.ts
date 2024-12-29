@@ -7,7 +7,6 @@ import {
   index,
   uniqueIndex,
   pgEnum,
-  PgArray,
   primaryKey,
 } from "drizzle-orm/pg-core";
 import {

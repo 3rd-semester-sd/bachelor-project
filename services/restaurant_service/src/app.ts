@@ -11,7 +11,6 @@ import {
 } from "fastify-type-provider-zod";
 import AutoLoad from "@fastify/autoload";
 import { dbPlugin } from "./plugins/dbPlugin";
-import { migrateDatabase } from "./db/db";
 import fastifyElasticsearch from "@fastify/elasticsearch";
 import fastifyAmqp from "fastify-amqp";
 import rabbitmqPlugin from "./plugins/rabbitmqPlugin";

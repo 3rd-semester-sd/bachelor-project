@@ -19,7 +19,6 @@ async def chat_with_embeddings(
 ) -> dict[str, Any]:
     """Endpoint for generating a response based on user input and embeddings."""
     try:
-        await es_service.get_info()
         result = await search_embedding(
             input_dto=input_dto, client=embedding_client, es_service=es_service, limit=2
         )

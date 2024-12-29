@@ -2,7 +2,6 @@ from openai import AsyncAzureOpenAI
 from app.api.dtos.dtos import (
     RestaurantEmbeddingInputDTO,
     RestaurantInputDTO,
-    RestaurantModelDTO,
     UserRequestDTO,
 )
 
@@ -20,6 +19,7 @@ async def _generate_embedding(
     model: str,
 ) -> list[float] | None:
     """Generate embedding for a given input string."""
+    
     response = await client.embeddings.create(input=[input_str], model=model)
     if response and response.data:
         return response.data[0].embedding
@@ -52,8 +52,7 @@ async def generate_restaurant_embedding(
     )
 
     return RestaurantEmbeddingInputDTO(
-        restaurant_id=input_dto.restaurant_id,
-        description=input_dto.description,
+        **input_dto.model_dump(),
         embedding=embedding,
     )
 
@@ -64,7 +63,7 @@ async def search_embedding(
     es_service: ElasticsearchService,
     limit: int,
     model: str = settings.ai_embedding_azure_model,
-) -> list[RestaurantModelDTO] | None:
+) -> list[RestaurantInputDTO] | None:
     """Search embedding using similarity search."""
 
     embedding = await _generate_embedding(
@@ -81,10 +80,10 @@ async def search_embedding(
         )
 
     result = await es_service.similarity_search(embedding=embedding, limit=limit)
-    
+
     return (
         [
-            RestaurantModelDTO(
+            RestaurantInputDTO(
                 restaurant_id=restaurant["_id"],
                 description=restaurant["_source"]["restaurant_description"],
                 restaurant_name=restaurant["_source"]["restaurant_name"],

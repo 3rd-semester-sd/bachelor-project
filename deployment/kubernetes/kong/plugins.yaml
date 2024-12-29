@@ -9,13 +9,21 @@ config:
   policy: local
 plugin: rate-limiting
 ---
+# apiVersion: configuration.konghq.com/v1
+# kind: KongPlugin
+# metadata:
+#   name: custom-keycloak-jwt
+# config:
+#   keycloak_introspection_url: "http://localhost:8090/realms/bachelor/protocol/openid-connect/token/introspect"
+#   client_id: "introspection-client"
+#   client_secret: "**********"
+# plugin: custom-keycloak-jwt
+---
 apiVersion: configuration.konghq.com/v1
 kind: KongPlugin
 metadata:
-  name: custom-keycloak-jwt
+  name: custom-authsvc-jwt
 config:
-  keycloak_introspection_url: "http://localhost:8090/realms/bachelor/protocol/openid-connect/token/introspect"
-  client_id: "introspection-client"
-  client_secret: "**********"
-plugin: custom-keycloak-jwt
+  current_user_url: "http://auth-service/api/v1/users/me"
+plugin: custom-authsvc-jwt
 

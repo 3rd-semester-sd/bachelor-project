@@ -1,0 +1,41 @@
+[project]
+name = "auth-service"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "asyncpg>=0.30.0",
+    "fastapi>=0.115.6",
+    "loguru>=0.7.3",
+    "mypy>=1.14.0",
+    "passlib>=1.7.4",
+    "pydantic-settings>=2.7.0",
+    "pydantic>=2.10.4",
+    "pyjwt>=2.10.1",
+    "ruff>=0.8.4",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "uvicorn>=0.34.0",
+    "yarl>=1.18.3",
+]
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+allow_subclassing_any = true
+allow_untyped_calls = true
+pretty = true
+show_error_codes = true
+implicit_reexport = true
+allow_untyped_decorators = true
+warn_return_any = false
+namespace_packages = true
+plugins = ["sqlalchemy.ext.mypy.plugin", "pydantic.mypy"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/pytest"]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning",
+    "ignore:.*unclosed.*:ResourceWarning",
+]

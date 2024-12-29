@@ -174,21 +174,21 @@ export class CRUDBase<
 
     try {
       await this.fastify.db.transaction(async (tx) => {
-        // const result = await tx
-        //   .delete(this.table)
-        //   .where(
-        //     eq((this.table as unknown as Record<string, any>)[this.idField], id)
-        //   )
-        //   .returning();
+        const result = await tx
+          .delete(this.table)
+          .where(
+            eq((this.table as unknown as Record<string, any>)[this.idField], id)
+          )
+          .returning();
 
-        // if (result.length === 0) {
-        //   return res.status(404).send({ error: `No ${this.esIndex} found.` });
-        // }
+        if (result.length === 0) {
+          return res.status(404).send({ error: `No ${this.esIndex} found.` });
+        }
 
-        // await this.fastify.elastic.delete({
-        //   index: this.esIndex,
-        //   id: id,
-        // });
+        await this.fastify.elastic.delete({
+          index: this.esIndex,
+          id: id,
+        });
 
         await this.onAfterDelete(id);
       });

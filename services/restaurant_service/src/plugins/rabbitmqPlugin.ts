@@ -3,6 +3,10 @@
 import { FastifyInstance, FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
 import { Channel } from "amqplib";
+import { da } from "@faker-js/faker/.";
+import { restaurantsTable } from "~/db/schema";
+import { eq } from "drizzle-orm";
+import { RestaurantStatus } from "~/db/enums";
 
 export type RabbitMQInitializerOptions = {
   exchangeName: string;
@@ -51,27 +55,30 @@ const rabbitmqInitializer: FastifyPluginAsync<RabbitMQInitializerOptions> = fp(
         fastify.log.info(
           `bound consumer for queue: "${queueName}", exchange: "${exchangeName}"  `
         );
+        // Add consumer
         channel.consume(q.queue, async (msg) => {
           if (!msg) return;
           try {
             const data = JSON.parse(msg.content.toString());
-            // data could look like:
-            // {
-            //   saga_id: string,
-            //   restaurant_id: string,
-            //   result: "success" | "failure",
-            //   error?: string
-            // }
-
+            console.log(data);
+            // If the result is success, update restaurant status in postgres
             if (data.result === "success") {
               fastify.log.info(`Successfully saved restaurant:${{ ...msg }}`);
-              // 1) Mark restaurant as ACTIVE in DB (if you maintain a status column).
-              // 2) Possibly log success or do any final steps.
+              await fastify.db
+                .update(restaurantsTable)
+                .set({ restaurant_status: RestaurantStatus.ACTIVE })
+                .where(eq(restaurantsTable.restaurant_id, data.restaurant_id));
             } else {
+              // If the result is not success remove from postgres and elastic search
               fastify.log.info(`Did not save restaurant:${msg}`);
-              // 1) We have a failure. We need to do a compensation step:
-              //    - e.g., delete the restaurant row, or set status to "FAILED"
-              //    - optionally remove from Elasticsearch
+              await fastify.db
+                .delete(restaurantsTable)
+                .where(eq(restaurantsTable.restaurant_id, data.restaurant_id));
+
+              await fastify.elastic.delete({
+                index: "restaurants",
+                id: data.restaurant_id,
+              });
             }
           } catch (err) {
             fastify.log.error(`Error in consumer: ${err}`);

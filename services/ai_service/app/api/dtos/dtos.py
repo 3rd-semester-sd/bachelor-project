@@ -1,4 +1,5 @@
-from pydantic import BaseModel, ConfigDict
+from datetime import datetime
+from pydantic import BaseModel, Field
 
 
 class UserRequestDTO(BaseModel):
@@ -8,6 +9,16 @@ class UserRequestDTO(BaseModel):
 class RestaurantInputDTO(BaseModel):
     restaurant_id: str
     description: str
+
+
+class RestaurantRabbitStatusDTO(BaseModel):
+    saga_id: str
+    time_stamp: datetime = Field(default_factory=datetime.now)
+    result: str = "Failed"
+    error: str | None = None
+
+
+class RestaurantRabbitInputDTO(RestaurantInputDTO, RestaurantRabbitStatusDTO): ...
 
 
 class RestaurantModelDTO(RestaurantInputDTO):

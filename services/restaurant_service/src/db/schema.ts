@@ -10,7 +10,12 @@ import {
   PgArray,
   primaryKey,
 } from "drizzle-orm/pg-core";
-import { CuisineType, enumToPgEnum, MenuCategory } from "~/db/enums";
+import {
+  CuisineType,
+  enumToPgEnum,
+  MenuCategory,
+  RestaurantStatus,
+} from "~/db/enums";
 
 export const cuisineTypePgEnum = pgEnum(
   "cuisineTypeEnum",
@@ -20,6 +25,11 @@ export const cuisineTypePgEnum = pgEnum(
 export const menuCategoryPgEnum = pgEnum(
   "menuCategoryEnum",
   enumToPgEnum(MenuCategory)
+);
+
+export const restaurantStatusPgEnum = pgEnum(
+  "restaurantStatusEnum",
+  enumToPgEnum(RestaurantStatus)
 );
 
 export const restaurantMembersTable = pgTable(
@@ -47,6 +57,9 @@ export const restaurantsTable = pgTable(
     restaurant_location: varchar({ length: 255 }).notNull(),
     restaurant_description: varchar({ length: 5120 }).notNull(),
     cuisine_type: cuisineTypePgEnum(),
+    restaurant_status: restaurantStatusPgEnum().default(
+      RestaurantStatus.PENDING
+    ),
   },
   (t) => [
     {

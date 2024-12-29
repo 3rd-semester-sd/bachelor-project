@@ -1,0 +1,51 @@
+image:
+  registry: docker.io
+  repository: bitnami/elasticsearch
+  tag: 8.17.0
+  debug: false
+
+master:
+  masterOnly: false
+  replicaCount: 1
+data:
+  replicaCount: 0
+coordinating:
+  replicaCount: 0
+ingest:
+  replicaCount: 0
+  
+roles:
+  master: true
+  data: true
+  ingest: true
+  # coordinating: false  # Not strictly necessary to define unless you want a separate "only coordinating" node
+
+persistence:
+  enabled: true
+  size: 8Gi
+  # storageClass: "standard"  # Or another StorageClass if needed
+
+heapSize: "2g"              
+resources:
+  requests:
+    cpu: "1"
+    memory: "1Gi"
+  limits:
+    cpu: "2"
+    memory: "2Gi"
+
+esConfig:
+  elasticsearch.yml: |
+    discovery.type: single-node
+    network.host: 0.0.0.0
+    xpack.security.enabled: false
+
+livenessProbe:
+  initialDelaySeconds: 90
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+readinessProbe:
+  initialDelaySeconds: 90
+  periodSeconds: 10
+  timeoutSeconds: 5

@@ -1,7 +1,6 @@
 app_name: example
 image: example-image
 container_port: 8000
-namespace: default
 
 replicaCount: 1
 
@@ -14,11 +13,11 @@ env:
 
 resources:
   requests:
-    memory: "128Mi"
-    cpu: "500m"
-  limits:
     memory: "256Mi"
-    cpu: "1"
+    cpu: "1000m"
+  limits:
+    memory: "512Mi"
+    cpu: "2"
 
 postgresql:
   enabled: false

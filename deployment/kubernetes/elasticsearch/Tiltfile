@@ -1,0 +1,13 @@
+load("ext://helm_resource", "helm_resource", "helm_repo")
+
+
+helm_resource(
+    name="elasticsearch",
+    chart="bitnami/elasticsearch",
+    flags=["--values=./values.yaml"],
+)   
+
+local_resource(
+    "elasticsearch-pf",
+    serve_cmd="kubectl port-forward service/elasticsearch 9200:9200",
+)

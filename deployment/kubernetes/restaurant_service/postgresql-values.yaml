@@ -1,8 +1,0 @@
-postgresql:
-  auth:
-    username: restaurant
-    password: restaurant
-    database: pg-restaurant-service
-  primary:
-    service:
-      port: 5432

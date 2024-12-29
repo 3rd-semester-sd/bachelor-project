@@ -13,6 +13,11 @@ export enum MenuCategory {
   DESSERTS = "desserts",
 }
 
+export enum RestaurantStatus{
+  ACTIVE = "active",
+  PENDING = "pending",
+}
+
 export function enumToPgEnum<T extends Record<string, any>>(
   myEnum: T
 ): [T[keyof T], ...T[keyof T][]] {

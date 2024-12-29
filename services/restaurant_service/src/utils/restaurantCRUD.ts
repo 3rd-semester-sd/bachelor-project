@@ -66,6 +66,8 @@ export class RestaurantCRUD extends CRUDBase<
         const msg = {
           restaurant_id: newRestaurantId,
           description: req.body.restaurant_description,
+          saga_id: newRestaurantId,
+          timestamp: new Date().toISOString(),
         };
 
         const msgBuffer = Buffer.from(JSON.stringify(msg));

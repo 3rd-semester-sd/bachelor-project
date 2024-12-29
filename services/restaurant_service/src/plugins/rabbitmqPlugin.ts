@@ -10,6 +10,7 @@ export type RabbitMQInitializerOptions = {
   queueName: string;
   routingKey: string;
   durable?: boolean;
+  shouldConsume?: boolean;
 };
 /// Initialize rabbitmq, to ensure bot the exchange and queue are created
 const rabbitmqInitializer: FastifyPluginAsync<RabbitMQInitializerOptions> = fp(
@@ -20,6 +21,7 @@ const rabbitmqInitializer: FastifyPluginAsync<RabbitMQInitializerOptions> = fp(
       queueName,
       routingKey,
       durable = true,
+      shouldConsume = false,
     } = options;
 
     try {
@@ -45,6 +47,40 @@ const rabbitmqInitializer: FastifyPluginAsync<RabbitMQInitializerOptions> = fp(
         `Queue "${queueName}" bound to exchange "${exchangeName}" with routing key "${routingKey}".`
       );
 
+      if (shouldConsume) {
+        fastify.log.info(
+          `bound consumer for queue: "${queueName}", exchange: "${exchangeName}"  `
+        );
+        channel.consume(q.queue, async (msg) => {
+          if (!msg) return;
+          try {
+            const data = JSON.parse(msg.content.toString());
+            // data could look like:
+            // {
+            //   saga_id: string,
+            //   restaurant_id: string,
+            //   result: "success" | "failure",
+            //   error?: string
+            // }
+
+            if (data.result === "success") {
+              fastify.log.info(`Successfully saved restaurant:${{ ...msg }}`);
+              // 1) Mark restaurant as ACTIVE in DB (if you maintain a status column).
+              // 2) Possibly log success or do any final steps.
+            } else {
+              fastify.log.info(`Did not save restaurant:${msg}`);
+              // 1) We have a failure. We need to do a compensation step:
+              //    - e.g., delete the restaurant row, or set status to "FAILED"
+              //    - optionally remove from Elasticsearch
+            }
+          } catch (err) {
+            fastify.log.error(`Error in consumer: ${err}`);
+          } finally {
+            channel.ack(msg);
+          }
+        });
+        return;
+      }
       await channel.close();
     } catch (error) {
       fastify.log.error(

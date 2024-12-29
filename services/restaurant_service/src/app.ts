@@ -93,6 +93,14 @@ fastify.register(rabbitmqPlugin, {
   routingKey: "",
 });
 
+fastify.register(rabbitmqPlugin, {
+  exchangeName: "embedding_result_exchange",
+  exchangeType: "fanout",
+  queueName: "restaurant_service_embedding_result",
+  routingKey: "",
+  shouldConsume: true
+});
+
 // This loads all plugins defined in routes
 // define your routes in one of these
 void fastify.register(AutoLoad, {

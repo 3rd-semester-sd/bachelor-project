@@ -67,14 +67,14 @@ async def _validate_seat_availability(
         raise exceptions.Http403("Not enough seats available.")
 
 
-async def _validate_booking_overlap(
+async def _ensure_no_overlap_in_bookings(
     r_dao: daos.GetDAORO,
     email: str,
     restaurant_id: UUID,
     booking_time: datetime,
     reservation_time_hr: int,
 ) -> None:
-    """Check if a booking exists for the email in the last n hours."""
+    """Ensure no overlap in bookings."""
     if await r_dao.check_duplicate_booking(
         email=email,
         restaurant_id=restaurant_id,
@@ -113,7 +113,7 @@ async def create_booking(
         closing_time_buffer_hr,
     )
 
-    await _validate_booking_overlap(
+    await _ensure_no_overlap_in_bookings(
         r_dao=r_dao,
         email=input_dto.email,
         restaurant_id=input_dto.restaurant_id,

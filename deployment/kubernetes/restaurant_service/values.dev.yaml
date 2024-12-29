@@ -1,0 +1,20 @@
+app_name: restaurant
+image: msalursen/restaurant-service:0.1
+container_port: 3000
+namespace: default
+
+env: 
+  restaurant_service_host: "0.0.0.0"
+  restaurant_service_port: 3000
+  restaurant_service_workers: "1"
+  restaurant_service_log_level: "info"
+  restaurant_service_reload: "true"
+  restaurant_database_url: "postgresql://restaurant:restaurant@postgresql-release:5432/pg-restaurant-service"
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "500m"
+  limits:
+    memory: "256Mi"
+    cpu: "1"

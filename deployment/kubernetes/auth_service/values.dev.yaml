@@ -1,0 +1,53 @@
+app_name: auth-service
+image: mslaursen/auth-service:0.1
+container_port: 8002
+namespace: default
+
+replicaCount: 1
+
+env: 
+  AUTH_SERVICE_HOST: "0.0.0.0"
+  AUTH_SERVICE_PORT: 8002
+  AUTH_SERVICE_WORKERS: 1
+  AUTH_SERVICE_LOG_LEVEL: info
+  AUTH_SERVICE_JWT_SECRET: yo
+
+  AUTH_SERVICE_PG_HOST: "auth-release-postgresql-primary"
+  AUTH_SERVICE_PG_PORT: 5432
+  AUTH_SERVICE_PG_USER: "postgres"
+  AUTH_SERVICE_PG_PASSWORD: "postgres"
+  AUTH_SERVICE_PG_DB: "auth-db"
+  AUTH_SERVICE_PG_POOL_SIZE: 15
+  AUTH_SERVICE_PG_ECHO: false
+
+  AUTH_SERVICE_PG_RO_HOST: "auth-release-postgresql-primary"
+  AUTH_SERVICE_PG_RO_PORT: 5432
+  AUTH_SERVICE_PG_RO_USER: "postgres"
+  AUTH_SERVICE_PG_RO_PASSWORD: "postgres"
+  AUTH_SERVICE_PG_RO_DB: "auth-db"
+  AUTH_SERVICE_PG_RO_POOL_SIZE: 15
+  AUTH_SERVICE_PG_RO_ECHO: false
+
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "500m"
+  limits:
+    memory: "256Mi"
+    cpu: "1"
+
+postgresql:
+  enabled: true
+  architecture: standalone
+  auth:
+    postgresPassword: postgres
+    username: postgres
+    password: postgres
+    database: auth-db
+
+  #   replicationUsername: postgres_repl
+  #   replicationPassword: postgres_repl
+
+  # readReplicas:
+  #   replicaCount: 1

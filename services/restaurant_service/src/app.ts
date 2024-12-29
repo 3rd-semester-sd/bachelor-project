@@ -81,7 +81,7 @@ fastify.register(fastifyElasticsearch, {
 
 fastify.register(fastifyAmqp, {
   hostname: process.env.RESTAURANT_RABBIT_HOSTNAME,
-  port: process.env.RESTAURANT_RABBIT_PORT,
+  port: Number(process.env.RESTAURANT_RABBIT_PORT),
   username: process.env.RESTAURANT_RABBIT_USERNAME,
   password: process.env.RESTAURANT_RABBIT_PASSWORD,
 });

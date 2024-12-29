@@ -64,7 +64,7 @@ export class RestaurantMenuItemCRUD extends CRUDBase<
    */
   protected async onAfterUpdate(
     updatedId: string,
-    updatedData: Partial<(typeof menuItemsTable)["$inferInsert"]>,
+    updatedData: any,
     req: FastifyRequest
   ): Promise<void> {
     const { elastic } = this.fastify;

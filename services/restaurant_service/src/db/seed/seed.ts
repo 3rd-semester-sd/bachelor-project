@@ -1,5 +1,5 @@
 import * as schema from "~/db/schema";
-import { RestaurantMembers, Restaurant, Menu, MenuItem } from "~/db/schema";
+import { RestaurantMember, Restaurant, Menu, MenuItem } from "~/db/schema";
 import { getDbClient } from "~/db/db";
 import { faker } from "@faker-js/faker";
 import { CuisineType, MenuCategory } from "../enums";
@@ -14,7 +14,7 @@ export async function main() {
   );
 
   for (let index = 0; index < 10; index++) {
-    const user: RestaurantMembers = {
+    const user: RestaurantMember = {
       name: faker.person.fullName(),
       email: faker.internet.email(),
     };

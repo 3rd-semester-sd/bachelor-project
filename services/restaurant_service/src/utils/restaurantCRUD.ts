@@ -113,7 +113,7 @@ export class RestaurantCRUD extends CRUDBase<
       },
     });
 
-    for (const result of esResult.hits.hits) {
+    for (const result of esResult.hits.hits as any[]) {
       await this.fastify.elastic.deleteByQuery({
         index: "restaurant_menu",
         body: {

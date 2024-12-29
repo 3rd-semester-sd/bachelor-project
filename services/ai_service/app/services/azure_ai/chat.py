@@ -32,8 +32,9 @@ async def generate_chat_response(
             temperature=temperature,
         )
         result = response.choices[0].message.content
+        logger.info(f"usage: {response.usage}")
         logger.info("Chat response successfully generated.")
         return result if result else "Nothing generated"
     except Exception as e:
         logger.error(f"Failed to generate chat response: {e}")
-        raise RuntimeError("Error while generating chat response.") from e
+        raise RuntimeError("Error wlhile generating chat response.") from e

@@ -36,6 +36,7 @@ class RestaurantPostDTO(BaseModel):
     restaurant_location: str = Field(..., alias="restaurant_location")
     cuisine_type: str = Field(..., alias="cuisine_type")
     restaurant_settings: RestaurantSettings = Field(default=RestaurantSettings())
+    member_id: str
 
 
 def load_restaurants_from_json(file_path: str) -> List[RestaurantInputDTO]:
@@ -61,6 +62,7 @@ def generate_additional_fields() -> dict[str, Any]:
         "restaurant_address": address,
         "restaurant_location": location,
         "cuisine_type": cuisine_type,
+        "member_id": "32a9d693-c2f2-47a7-9ce4-e66ca455792b",
     }
 
 
@@ -83,7 +85,7 @@ def main():
     json_file_path = "./test_data/restaurants.json"
     restaurants = load_restaurants_from_json(json_file_path)
 
-    endpoint_url = "http://localhost:3000/restaurants"
+    endpoint_url = "http://localhost:3000/api/restaurants"
 
     for restaurant_input in restaurants:
         # Generate additional fields
@@ -95,6 +97,7 @@ def main():
             restaurant_address=additional_fields["restaurant_address"],
             restaurant_location=additional_fields["restaurant_location"],
             cuisine_type=additional_fields["cuisine_type"],
+            member_id=additional_fields["member_id"],
         )
 
         # Post to the endpoint

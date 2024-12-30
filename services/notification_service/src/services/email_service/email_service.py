@@ -23,12 +23,15 @@ async def _send(
         "html": email.html,
     }
 
-    async with aiohttp.ClientSession() as client, client.request(
-        "POST",
-        url,
-        auth=auth,
-        data=data,
-    ) as response:
+    async with (
+        aiohttp.ClientSession() as client,
+        client.request(
+            "POST",
+            url,
+            auth=auth,
+            data=data,
+        ) as response,
+    ):
         return response
 
 

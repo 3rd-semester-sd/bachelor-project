@@ -14,7 +14,7 @@ import tasks
 
 import utils
 
-base_router_v1 = APIRouter(prefix="/api/v1")
+base_router_v1 = APIRouter(prefix="/api")
 
 
 ##################

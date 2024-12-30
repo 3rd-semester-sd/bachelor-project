@@ -10,8 +10,10 @@ for tf in [
     "services/auth_service/Tiltfile",
     "deployment/kubernetes/rabbitmq/Tiltfile",
     "deployment/kubernetes/redis/Tiltfile",
+    # "deployment/kubernetes/keycloak/Tiltfile",
+    "deployment/kubernetes/kong/Tiltfile",
     "deployment/kubernetes/elasticsearch/Tiltfile",
-    "deployment/kubernetes/keycloak/Tiltfile",
-    "deployment/kubernetes/kong/Tiltfile"]:
+    
+]:
     if os.path.exists(tf):
         include(tf)

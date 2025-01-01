@@ -17,4 +17,4 @@ k8s_yaml(yaml)
 
 # k8s_resource("postgresql-ai", port_forwards=5434)
 
-k8s_resource("ai", port_forwards=8089)
+k8s_resource("ai-service", port_forwards=8089)

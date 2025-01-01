@@ -83,26 +83,10 @@ class RestaurantClient:
     ) -> RestaurantReponseDTO:
         """Get a restaurant by ID."""
 
-        if settings.environment != "local":
-            data = await self._base_request(
-                method="GET",
-                url=settings.restaurant_service_url + str(restaurant_id),
-            )
-        else:
-            data = {
-                "data": {
-                    "restaurant_id": str(uuid4()),
-                    "restaurant_name": "Local Test Restaurant",
-                    "restaurant_settings": {
-                        "max_seats": 30,
-                        "opening_hr": 10,
-                        "closing_hr": 22,
-                        "open_days": [1, 1, 1, 1, 1, 1, 0],
-                        "reservation_time_hr": 2,
-                        "closing_time_buffer_hr": 2,
-                    },
-                }
-            }
+        data = await self._base_request(
+            method="GET",
+            url=settings.restaurant_service_url + str(restaurant_id),
+        )
 
         return RestaurantReponseDTO.model_validate(data["data"])
 

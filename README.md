@@ -56,4 +56,7 @@ helm install rabbitmq bitnami/rabbitmq -f deployment/kubernetes/rabbitmq/values.
 
 # redis
 helm install redis bitnami/redis -f deployment/kubernetes/redis/values.dev.yaml
+
+# elasticsearch
+helm install elasticsearch bitnami/elasticsearch -f deployment/kubernetes/elasticsearch/values.dev.yaml
 ```

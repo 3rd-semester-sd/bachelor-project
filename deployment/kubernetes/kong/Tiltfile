@@ -1,44 +1,25 @@
-# local_resource(
-#     name="create-custom-keycloak-jwt-configmap",
-#     serve_cmd="kubectl create configmap custom-keycloak-jwt --from-file=./custom-plugins/custom-keycloak-jwt",
-# )
 local_resource(
     name="create-custom-authsvc-jwt-configmap",
     serve_cmd="kubectl create configmap custom-authsvc-jwt --from-file=./custom-plugins/custom-authsvc-jwt",
 )
 load("ext://helm_resource", "helm_resource", "helm_repo")
 
-helm_repo(name="kong", url="https://charts.konghq.com")
+helm_repo(name="kong-ingress", url="https://charts.konghq.com")
 helm_resource(
-    name="kong-ingress",
-    chart="kong/ingress",
+    name="kong",
+    chart="kong/kong",
     flags=["--values=./values.yaml"],
 )
-
-# install gateway api CRDs
-gateway_api_yaml = local(
-    command="curl -sL https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/standard-install.yaml",
-    quiet=True,
-    echo_off=True,
-)
-
-k8s_yaml(gateway_api_yaml)
-
-# kong ingress manifests just sends commands to the ingress-gateway,
-# so these won't show up in the tilt ui
-
 
 k8s_yaml(
     [
         "./plugins.yaml",
-        "./gateway_class.yaml",
-        "./gateway.yaml",
-        "./http_route.yaml",
+        "./ingress.yaml",
     ]
 )
 
 # kubectl port-forward service/kong-ingress-gateway-proxy 8080:80
 local_resource(
     "kong-pf",
-    serve_cmd="kubectl port-forward service/kong-ingress-gateway-proxy 8080:80",
+    serve_cmd="kubectl port-forward service/kong-kong-proxy 8080:80",
 )

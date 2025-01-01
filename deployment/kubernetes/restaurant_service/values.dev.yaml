@@ -1,4 +1,4 @@
-app_name: restaurant
+app_name: restaurant-service
 image: msalursen/restaurant-service:0.1
 container_port: 3000
 namespace: default

@@ -1,22 +1,20 @@
-image:
-  repository: kong
-  tag: "3.6"
+replicaCount: 1
 
-deployment:
-  kong:
-    enabled: false
-
-env:
-  prefix: /kong_prefix/
-  database: "off"
-
-ingressController:
+admin:
   enabled: true
+  type: NodePort
 
-gateway:
-  plugins:
-    configMaps:
-    - name: custom-authsvc-jwt
-      pluginName: custom-authsvc-jwt
-    # - name: custom-keycloak-jwt
-    #   pluginName: custom-keycloak-jwt
+  tls:
+    enabled: false
+    
+  http:
+    enabled: true
+
+proxy:
+  labels:
+    enabled: "false"
+
+plugins:
+  configMaps:
+  - name: custom-authsvc-jwt
+    pluginName: custom-authsvc-jwt

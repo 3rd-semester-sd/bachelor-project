@@ -1,0 +1,20 @@
+replicaCount: 1
+
+admin:
+  enabled: true
+  type: LoadBalancer
+
+  tls:
+    enabled: false
+    
+  http:
+    enabled: true
+
+proxy:
+  labels:
+    enabled: "false"
+
+plugins:
+  configMaps:
+  - name: custom-authsvc-jwt
+    pluginName: custom-authsvc-jwt

@@ -43,24 +43,17 @@ helm install notification-release deployment/charts/base -f deployment/kubernete
 helm install restaurant-release deployment/charts/base -f deployment/kubernetes/restaurant_service/values.dev.yaml
 
 # kong
-kubectl create configmap customjwt --from-file=deployment/kubernetes/kong/custom-plugins/custom-authsvc-jwt
-helm repo add kong https://charts.konghq.com
-helm install kong-ingress kong/ingress -f deployment/kubernetes/kong/values.yaml
-
-curl -sL https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/standard-install.yaml -o gateway-api.yaml
-kubectl apply -f gateway-api.yaml
-
-kubectl apply -f deployment/kubernetes/kong/gateway_class.yaml
-kubectl apply -f deployment/kubernetes/kong/gateway.yaml
-kubectl apply -f deployment/kubernetes/kong/http_route.yaml
+kubectl create configmap custom-authsvc-jwt --from-file=deployment/kubernetes/kong/custom-plugins/custom-authsvc-jwt
+helm install kong kong/kong -f deployment/kubernetes/kong/values.dev.yaml
+kubectl apply -f deployment/kubernetes/kong/ingress.yaml
 kubectl apply -f deployment/kubernetes/kong/plugins.yaml
 
 # bitnami
 helm repo add bitnami https://charts.bitnami.com/bitnami
-
+-
 # rabbitmq
 helm install rabbitmq bitnami/rabbitmq -f deployment/kubernetes/rabbitmq/values.yaml
 
 # redis
-helm install redis bitnami/redis -f deployment/kubernetes/redis/values.yaml
+helm install redis bitnami/redis -f deployment/kubernetes/redis/values.dev.yaml
 ```

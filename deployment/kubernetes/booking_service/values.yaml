@@ -19,13 +19,21 @@ env:
   BOOKING_SERVICE_PG_POOL_SIZE: 15
   BOOKING_SERVICE_PG_ECHO: false
 
-  BOOKING_SERVICE_PG_RO_HOST: "booking-release-postgresql-read"
+  BOOKING_SERVICE_PG_RO_HOST: "booking-release-postgresql-primary"
   BOOKING_SERVICE_PG_RO_PORT: 5432
-  BOOKING_SERVICE_PG_RO_USER: "postgres_repl"
-  BOOKING_SERVICE_PG_RO_PASSWORD: "postgres_repl"
+  BOOKING_SERVICE_PG_RO_USER: "postgres"
+  BOOKING_SERVICE_PG_RO_PASSWORD: "postgres"
   BOOKING_SERVICE_PG_RO_DB: "booking-db"
   BOOKING_SERVICE_PG_RO_POOL_SIZE: 15
   BOOKING_SERVICE_PG_RO_ECHO: false
+
+  # BOOKING_SERVICE_PG_RO_HOST: "booking-release-postgresql-read"
+  # BOOKING_SERVICE_PG_RO_PORT: 5432
+  # BOOKING_SERVICE_PG_RO_USER: "postgres_repl"
+  # BOOKING_SERVICE_PG_RO_PASSWORD: "postgres_repl"
+  # BOOKING_SERVICE_PG_RO_DB: "booking-db"
+  # BOOKING_SERVICE_PG_RO_POOL_SIZE: 15
+  # BOOKING_SERVICE_PG_RO_ECHO: false
 
 resources:
   requests:
@@ -37,15 +45,15 @@ resources:
 
 postgresql:
   enabled: true
-  architecture: replication
+  architecture: standalone # or "replication"
   auth:
     postgresPassword: postgres
     username: postgres
     password: postgres
     database: booking-db
 
-    replicationUsername: postgres_repl
-    replicationPassword: postgres_repl
+  #   replicationUsername: postgres_repl
+  #   replicationPassword: postgres_repl
 
-  readReplicas:
-    replicaCount: 1
+  # readReplicas:
+  #   replicaCount: 1

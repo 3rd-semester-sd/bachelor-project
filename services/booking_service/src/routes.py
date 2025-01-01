@@ -14,7 +14,8 @@ import tasks
 
 import utils
 
-base_router_v1 = APIRouter(prefix="/api/v1")
+base_router = APIRouter(prefix="/api")
+base_router_v1 = APIRouter(prefix="/v1")
 
 
 ##################
@@ -86,7 +87,7 @@ async def _ensure_no_overlap_in_bookings(
         )
 
 
-@booking_router.post("")
+@booking_router.post("", status_code=201)
 async def create_booking(
     input_dto: dtos.BookingInputDTO,
     r_dao: daos.GetDAORO,
@@ -174,7 +175,7 @@ async def confirm_booking(
     redis: GetRedis,
     rmq: GetRMQ,
     background_tasks: BackgroundTasks,
-) -> None:
+) -> dtos.ValueResponse[bool]:
     """Confirm a booking."""
 
     redis_key = utils.redis_confirmation_key(confirmation_code)
@@ -216,6 +217,8 @@ async def confirm_booking(
         number_of_people=db_booking.number_of_people,
     )
 
+    return dtos.ValueResponse(data=True)
+
 
 @booking_router.get("/{booking_id}")
 async def get_booking(
@@ -250,6 +253,7 @@ async def get_booking_list(
 
 
 base_router_v1.include_router(booking_router)
+base_router.include_router(base_router_v1)
 
 
 #################
@@ -257,7 +261,7 @@ base_router_v1.include_router(booking_router)
 #################
 
 
-@base_router_v1.get("/health")
+@base_router.get("/health")
 async def health_check() -> bool:
     """Return True if the service is healthy."""
 
@@ -271,12 +275,12 @@ async def health_check() -> bool:
 demo_router = APIRouter(prefix="/demo")
 
 
-@demo_router.post("/send-notification")
+@demo_router.post("/send-notification", status_code=201)
 async def send_notification(rmq: GetRMQ) -> bool:
     """Send a notification."""
 
     await rmq.send_confirmation_email(
-        email="martin_laursen9@hotmail.com",
+        email="martin_laursen21@hotmail.com",
         full_name="Martin Laursen",
         restaurant_name="Applebee's",
         booking_time=datetime.now(),
@@ -304,4 +308,4 @@ async def demo_task(
     )
 
 
-base_router_v1.include_router(demo_router)
+base_router.include_router(demo_router)

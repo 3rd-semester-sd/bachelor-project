@@ -8,7 +8,7 @@ for tf in [
     #"services/booking_service/Tiltfile",
     "services/notification_service/Tiltfile",
     "services/auth_service/Tiltfile",
-    #"deployment/kubernetes/rabbitmq/Tiltfile",
+    "deployment/kubernetes/rabbitmq/Tiltfile",
     #"deployment/kubernetes/redis/Tiltfile",
     #"deployment/kubernetes/keycloak/Tiltfile",
     "deployment/kubernetes/kong/Tiltfile",

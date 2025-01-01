@@ -18,7 +18,7 @@ async def health_check() -> bool:
     return True
 
 
-@base_router.get("/authsvc")
+@base_router.get("/protected/authsvc")
 async def test_authsvc(request: Request) -> bool:
     """Test authsvc."""
     logger.info(f"Request: {request.headers}")

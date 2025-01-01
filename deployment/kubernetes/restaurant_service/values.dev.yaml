@@ -9,8 +9,7 @@ env:
   restaurant_service_workers: "1"
   restaurant_service_log_level: "info"
   restaurant_service_reload: "true"
-  restaurant_database_url: "postgresql://restaurant:restaurant@postgresql-release:5432/pg-restaurant-service"
-
+  restaurant_database_url: "postgresql://bachelor@pg-kea-bachelor-restaurant:P@ssw0rd@pg-kea-bachelor-restaurant.postgres.database.azure.com:5432/restaurant-db"
 resources:
   requests:
     memory: "128Mi"

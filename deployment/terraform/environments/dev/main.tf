@@ -52,4 +52,20 @@ module "postgres-booking" {
   create_database     = local.booking_service_create_database
 }
 
+module "postgres-restaurant" {
+  depends_on = [module.rg]
+
+  source      = "../../modules/azure/postgres"
+  rg_name     = local.azurerm_resource_group_rg_name
+  rg_location = local.azurerm_resource_group_rg_location
+
+  primary_server_name = local.restaurant_service_postgresql_primary_server_name
+  admin_login         = local.restaurant_service_postgresql_admin_login
+  admin_password      = local.restaurant_service_postgresql_admin_password
+  sku_name            = local.restaurant_service_postgresql_sku_name
+  firewall_rule_name  = local.restaurant_service_postgresql_firewall_rule_name
+  database_name       = local.restaurant_service_database_name
+  create_replica      = local.restaurant_service_create_replica
+  create_database     = local.restaurant_service_create_database
+}
 

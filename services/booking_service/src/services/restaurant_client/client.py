@@ -1,9 +1,9 @@
-from httpx import AsyncClient, Response
+from httpx import AsyncClient
 from typing import Annotated, Any, AsyncGenerator
 from fastapi import Depends
 import exceptions
 from settings import settings
-from uuid import UUID
+from uuid import UUID, uuid4
 from pydantic import BaseModel
 
 
@@ -14,6 +14,25 @@ async def get_http_client() -> AsyncGenerator[AsyncClient, None]:
 
 
 GetHTTPClient = Annotated[AsyncClient, Depends(get_http_client)]
+
+
+class ResturantSettingsDTO(BaseModel):
+    """Restaurant settings DTO."""
+
+    max_seats: int
+    opening_hr: int
+    closing_hr: int
+    open_days: list[int]  # (1, 1, 1, 1, 1, 1, 0)
+    reservation_time_hr: int
+    closing_time_buffer_hr: int
+
+
+class RestaurantReponseDTO(BaseModel):
+    """Restaurant response DTO."""
+
+    restaurant_id: UUID
+    restaurant_name: str
+    restaurant_settings: ResturantSettingsDTO
 
 
 class RestaurantClient:
@@ -32,7 +51,7 @@ class RestaurantClient:
         json: dict[str, Any] | None = None,
         data: dict[str, Any] | None = None,
         **kwargs: Any,
-    ) -> Response:
+    ) -> dict[str, Any]:
         """Make a request."""
 
         try:
@@ -47,12 +66,45 @@ class RestaurantClient:
         except Exception as e:
             raise exceptions.Http500(f"Failed to make request: {e}")
 
-        return response
+        data = None
+        try:
+            data = response.json()
+        except Exception as e:
+            raise exceptions.Http500(f"Failed to parse response: {e}")
+
+        if data is None:
+            raise exceptions.Http500("Failed to parse response: no data")
+
+        return data
 
     async def get_restaurant_by_id(
         self,
         restaurant_id: UUID,
-    ) -> Response:
+    ) -> RestaurantReponseDTO:
         """Get a restaurant by ID."""
-        url = settings.restaurant_service_url + str(restaurant_id)
-        return await self._base_request("GET", url)
+
+        if settings.environment != "local":
+            data = await self._base_request(
+                method="GET",
+                url=settings.restaurant_service_url + str(restaurant_id),
+            )
+        else:
+            data = {
+                "data": {
+                    "restaurant_id": str(uuid4()),
+                    "restaurant_name": "Local Test Restaurant",
+                    "restaurant_settings": {
+                        "max_seats": 30,
+                        "opening_hr": 10,
+                        "closing_hr": 22,
+                        "open_days": [1, 1, 1, 1, 1, 1, 0],
+                        "reservation_time_hr": 2,
+                        "closing_time_buffer_hr": 2,
+                    },
+                }
+            }
+
+        return RestaurantReponseDTO.model_validate(data["data"])
+
+
+GetRestaurantClient = Annotated[RestaurantClient, Depends()]

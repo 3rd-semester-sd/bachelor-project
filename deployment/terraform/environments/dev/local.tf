@@ -30,4 +30,13 @@ locals {
   booking_service_create_replica                 = false
   booking_service_create_database                = true
 
+  # PostgreSQL Restaurant Service
+  restaurant_service_postgresql_primary_server_name = "pg-kea-bachelor-restaurant"
+  restaurant_service_postgresql_admin_login         = "bachelor"
+  restaurant_service_postgresql_admin_password      = "P@ssw0rd"
+  restaurant_service_postgresql_sku_name            = "B_Gen5_2"
+  restaurant_service_postgresql_firewall_rule_name  = "firewall-rule-kea-bachelor-restaurant"
+  restaurant_service_database_name                  = "restaurant-db"
+  restaurant_service_create_replica                 = false
+  restaurant_service_create_database                = true
 }

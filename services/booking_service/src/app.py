@@ -11,7 +11,6 @@ from routes import base_router
 from db import db_lifetime
 from loguru import logger
 from services.redis import lifetime as redis_lifetime
-from loguru import logger
 
 
 @asynccontextmanager

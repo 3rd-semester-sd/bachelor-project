@@ -4,6 +4,7 @@ import { CuisineType } from "~/db/enums";
 export const restaurantSettingDTO = z.object({
   max_seats: z.number().default(30),
   opening_hr: z.number().default(10),
+  closing_hr: z.number().default(22),
   open_days: z.array(z.number()).default([1, 1, 1, 1, 1, 1, 0]),
   reservation_time_hr: z.number().default(2),
   closing_time_buffer_hr: z.number().default(2),

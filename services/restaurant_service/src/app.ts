@@ -11,6 +11,9 @@ import {
 } from "fastify-type-provider-zod";
 import AutoLoad from "@fastify/autoload";
 import { dbPlugin } from "./plugins/dbPlugin";
+import fastifyElasticsearch from "@fastify/elasticsearch";
+import fastifyAmqp from "fastify-amqp";
+import rabbitmqPlugin from "./plugins/rabbitmqPlugin";
 
 const fastify = Fastify({
   logger:
@@ -45,7 +48,7 @@ fastify.register(fastifySwaggerUI, {
       : undefined,
 
   uiConfig: {
-    docExpansion: "full",
+    docExpansion: "list",
     deepLinking: false,
   },
   uiHooks: {
@@ -70,11 +73,40 @@ fastify.setSerializerCompiler(serializerCompiler);
 fastify.register(dbPlugin, {
   databaseUrl: process.env.RESTAURANT_DATABASE_URL!,
 });
+// elastic searcg
+fastify.register(fastifyElasticsearch, {
+  node: process.env.RESTAURANT_ES_URL,
+});
+
+fastify.register(fastifyAmqp, {
+  hostname: process.env.RESTAURANT_RABBIT_HOSTNAME,
+  port: Number(process.env.RESTAURANT_RABBIT_PORT),
+  username: process.env.RESTAURANT_RABBIT_USERNAME,
+  password: process.env.RESTAURANT_RABBIT_PASSWORD,
+});
+
+fastify.register(rabbitmqPlugin, {
+  exchangeName: "new_restaurant_exchange",
+  exchangeType: "fanout",
+  queueName: "new_restaurant_queue",
+  routingKey: "",
+});
+
+fastify.register(rabbitmqPlugin, {
+  exchangeName: "embedding_result_exchange",
+  exchangeType: "fanout",
+  queueName: "restaurant_service_embedding_result",
+  routingKey: "",
+  shouldConsume: true
+});
 
 // This loads all plugins defined in routes
 // define your routes in one of these
 void fastify.register(AutoLoad, {
   dir: join(__dirname, "routes"),
+  dirNameRoutePrefix: (folderParent, folderName) => {
+    return `api/${folderName.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase()}`;
+  },
 });
 
 export const app = fastify.withTypeProvider<ZodTypeProvider>();

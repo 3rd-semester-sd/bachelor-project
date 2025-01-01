@@ -8,13 +8,13 @@ yaml = helm(
 k8s_yaml(yaml)
 
 # deploy the PostgreSQL Helm chart
-postgres_yaml = helm(
-    "../../deployment/charts/postgresql",
-    name="postgresql-release",
-    values=["../../deployment/kubernetes/restaurant_service/postgresql-values.yaml"],
-)
-k8s_yaml(postgres_yaml)
+# postgres_yaml = helm(
+#     "../../deployment/charts/postgresql",
+#     name="restaurant-release-postgresql",
+#     values=["../../deployment/kubernetes/restaurant_service/postgresql-values.yaml"],
+# )
+# k8s_yaml(postgres_yaml)
 
-k8s_resource("postgresql-release", port_forwards=5432)
+k8s_resource("restaurant-pg", port_forwards=5432)
 
 k8s_resource("restaurant", port_forwards=3000)

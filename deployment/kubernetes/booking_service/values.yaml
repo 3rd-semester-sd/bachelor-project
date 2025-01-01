@@ -1,7 +1,6 @@
 app_name: booking-service
 image: booking-image
 container_port: 8000
-namespace: default
 
 replicaCount: 1
 
@@ -11,7 +10,7 @@ env:
   BOOKING_SERVICE_WORKERS: 1
   BOOKING_SERVICE_LOG_LEVEL: info
 
-  BOOKING_SERVICE_PG_HOST: "booking-release-postgresql-primary"
+  BOOKING_SERVICE_PG_HOST: "booking-pg-primary"
   BOOKING_SERVICE_PG_PORT: 5432
   BOOKING_SERVICE_PG_USER: "postgres"
   BOOKING_SERVICE_PG_PASSWORD: "postgres"

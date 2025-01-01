@@ -1,5 +1,5 @@
 import { BasePlugin } from "~/types/BasePlugin";
-import { defaultResponseDTO } from "~/dtos/response_dtos";
+import { defaultResponseDTO } from "~/dtos/responseDTOs";
 import { z } from "zod";
 
 export const route: BasePlugin = async (fastify, opts) => {
@@ -7,7 +7,7 @@ export const route: BasePlugin = async (fastify, opts) => {
     method: "GET",
     url: "",
     schema: {
-      tags: ["Restaurant"],
+      tags: ["Health"],
       response: {
         200: defaultResponseDTO,
         500: z.object({ error: z.string() }),

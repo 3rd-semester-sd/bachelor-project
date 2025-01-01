@@ -11,12 +11,15 @@ from routes import base_router
 from db import db_lifetime
 from loguru import logger
 from services.redis import lifetime as redis_lifetime
+from loguru import logger
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Lifespan."""
 
+    logger.info(settings.pg.url)
+    logger.info(settings.pg_ro.url)
     await db_lifetime.setup_db_ro(app)
     await db_lifetime.setup_db(app)
 
@@ -33,7 +36,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 def get_app() -> FastAPI:
-    logger.info(
+    print(
         settings.model_dump_json(indent=2),
     )
 

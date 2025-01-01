@@ -40,7 +40,7 @@ docker push mslaursen/x-service:x.x
 
 (Terraform) deploy all infrastructure
 ```bash
-cd deployment/terraform/dev
+cd deployment/terraform/environments/dev
 terraform init
 terraform apply
 ```

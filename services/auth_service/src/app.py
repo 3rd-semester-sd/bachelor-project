@@ -4,7 +4,7 @@ from settings import settings
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from fastapi import FastAPI
-from routes import router
+from routes import base_router
 from db import db_lifetime
 
 
@@ -28,7 +28,7 @@ def get_app() -> FastAPI:
     )
 
     app = FastAPI(lifespan=lifespan)
-    app.include_router(router)
+    app.include_router(base_router)
     return app
 
 

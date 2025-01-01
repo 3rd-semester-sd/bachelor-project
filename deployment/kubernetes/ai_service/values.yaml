@@ -1,4 +1,4 @@
-app_name: ai
+app_name: ai-service
 image: ai-image
 container_port: 8089
 

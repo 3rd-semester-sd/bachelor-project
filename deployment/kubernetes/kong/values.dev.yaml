@@ -2,7 +2,7 @@ replicaCount: 1
 
 admin:
   enabled: true
-  type: NodePort
+  type: LoadBalancer
 
   tls:
     enabled: false

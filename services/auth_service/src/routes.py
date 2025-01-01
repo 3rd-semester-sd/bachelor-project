@@ -4,17 +4,19 @@ import daos
 import exceptions
 import auth_utils
 
-router = APIRouter(prefix="/api")
+base_router = APIRouter(prefix="/api")
+base_router_v1 = APIRouter(prefix="/v1")
+auth_router = APIRouter(prefix="/auth")
 
 
-@router.get("/health")
+@base_router.get("/health")
 async def health_check() -> bool:
     """Return True if the service is healthy."""
 
     return True
 
 
-@router.post("/v1/login-email", status_code=200)
+@auth_router.post("/login-email", status_code=201)
 async def login(
     input_dto: dtos.UserLoginDTO,
     r_daos: daos.GetDAORO,
@@ -42,7 +44,7 @@ async def login(
     return dtos.DataResponse(data=dtos.LoginResponse(access_token=token))
 
 
-@router.post("/v1/register", status_code=201)
+@auth_router.post("/register", status_code=201)
 async def register(
     input_dto: dtos.UserCreateDTO,
     r_daos: daos.GetDAORO,
@@ -71,10 +73,14 @@ async def register(
     )
 
 
-@router.get("/v1/users/me", status_code=200)
+@auth_router.get("/users/me", status_code=200)
 async def get_current_user(
     current_user: auth_utils.GetCurrentUser,
 ) -> dtos.DataResponse[dtos.BaseUserDTO]:
     """Get current user."""
 
     return dtos.DataResponse(data=current_user)
+
+
+base_router_v1.include_router(auth_router)
+base_router.include_router(base_router_v1)

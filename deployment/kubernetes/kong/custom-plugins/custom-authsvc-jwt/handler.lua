@@ -31,6 +31,14 @@ local function make_get_request(url, headers)
 end
 
 function Plugin:access(config)
+    -- skip if the request is not for a protected resource
+    if not string.match(ngx.var.request_uri, "/protected") then
+        return
+    end
+
+    ngx.log(ngx.NOTICE, "Request is for a protected resource", ngx.var.request_uri)
+
+
     local access_token = ngx.var.http_authorization
     if not access_token then
         return send_json_error(

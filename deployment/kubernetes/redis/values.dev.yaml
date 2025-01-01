@@ -1,0 +1,8 @@
+architecture: standalone
+
+auth:
+  enabled: false
+  password: password
+
+replica:
+  replicaCount: 0

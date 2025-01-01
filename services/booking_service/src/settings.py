@@ -117,11 +117,15 @@ class RedisSettings(BaseSettings):
 class Settings(BaseSettings):
     """Settings for the booking service."""
 
+    environment: str = "local"
+
     host: str = "localhost"
     port: int = 8000
     workers: int = 1
     log_level: str = "info"
     reload: bool = False
+
+    restaurant_service_url: str = "http://restaurant-service"
 
     pg: PGSettings = PGSettings()
     pg_ro: PGSettingsRO = PGSettingsRO()

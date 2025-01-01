@@ -1,4 +1,3 @@
-# from services.rabbit.lifetime import init_rabbit, shutdown_rabbit
 from services.rabbit.lifetime import (
     init_rabbit,
     shutdown_rabbit,
@@ -8,10 +7,10 @@ from settings import settings
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from fastapi import FastAPI
-from routes import base_router_v1
+from routes import base_router
 from db import db_lifetime
-from services.redis import lifetime as redis_lifetime
 from loguru import logger
+from services.redis import lifetime as redis_lifetime
 
 
 @asynccontextmanager
@@ -41,7 +40,7 @@ def get_app() -> FastAPI:
     )
 
     app = FastAPI(lifespan=lifespan)
-    app.include_router(base_router_v1)
+    app.include_router(base_router)
     return app
 
 

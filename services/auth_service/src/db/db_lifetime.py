@@ -5,6 +5,8 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from db import meta
 import sqlalchemy as sa
 
+from loguru import logger
+
 
 async def setup_db_ro(app: FastAPI) -> None:
     """Setup read only database."""
@@ -35,18 +37,20 @@ async def setup_db(app: FastAPI) -> None:
 
     async with engine.begin() as conn:
         await conn.run_sync(meta.create_all)
-        query = """
-        GRANT SELECT ON ALL TABLES IN SCHEMA public TO postgres_repl;
-        """
+        if settings.pg_ro.url != settings.pg.url and settings.environment == "local":
+            logger.info("Setting up read only user permissions.")
+            query = f"""
+            GRANT SELECT ON ALL TABLES IN SCHEMA public TO {settings.pg_ro.user};
+            """
 
-        await conn.execute(sa.text(query))
+            await conn.execute(sa.text(query))
 
-        query = """
-        ALTER DEFAULT PRIVILEGES IN SCHEMA public
-        GRANT SELECT ON TABLES TO postgres_repl;
-        """
+            query = f"""
+            ALTER DEFAULT PRIVILEGES IN SCHEMA public
+            GRANT SELECT ON TABLES TO {settings.pg_ro.user};
+            """
 
-        await conn.execute(sa.text(query))
+            await conn.execute(sa.text(query))
 
     await engine.dispose()
 

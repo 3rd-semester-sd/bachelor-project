@@ -65,6 +65,8 @@ class PGSettingsRO(PGSettings):
 class Settings(BaseSettings):
     """Settings for the auth service."""
 
+    environment: str = "local"
+
     host: str = "localhost"
     port: int = 8000
     workers: int = 1

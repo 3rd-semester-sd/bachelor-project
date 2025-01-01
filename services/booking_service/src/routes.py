@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from enums import BookingStatus
 from services.rabbit.dependencies import GetRMQ
+from services.restaurant_client.client import GetRestaurantClient
 import daos
 import dtos
 import exceptions
@@ -14,7 +15,8 @@ import tasks
 
 import utils
 
-base_router_v1 = APIRouter(prefix="/api")
+base_router = APIRouter(prefix="/api")
+base_router_v1 = APIRouter(prefix="/v1")
 
 
 ##################
@@ -27,7 +29,7 @@ booking_router = APIRouter(prefix="/booking")
 
 def _validate_booking_time(
     input_dto: dtos.BookingInputDTO,
-    open_days: tuple[int, ...],
+    open_days: list[int],
     opening_hr: int,
     closing_hr: int,
     closing_time_buffer_hr: int,
@@ -67,14 +69,14 @@ async def _validate_seat_availability(
         raise exceptions.Http403("Not enough seats available.")
 
 
-async def _validate_booking_overlap(
+async def _ensure_no_overlap_in_bookings(
     r_dao: daos.GetDAORO,
     email: str,
     restaurant_id: UUID,
     booking_time: datetime,
     reservation_time_hr: int,
 ) -> None:
-    """Check if a booking exists for the email in the last n hours."""
+    """Ensure no overlap in bookings."""
     if await r_dao.check_duplicate_booking(
         email=email,
         restaurant_id=restaurant_id,
@@ -86,9 +88,10 @@ async def _validate_booking_overlap(
         )
 
 
-@booking_router.post("")
+@booking_router.post("", status_code=201)
 async def create_booking(
     input_dto: dtos.BookingInputDTO,
+    restaurant_client: GetRestaurantClient,
     r_dao: daos.GetDAORO,
     w_dao: daos.GetDAO,
     rmq: GetRMQ,
@@ -97,35 +100,32 @@ async def create_booking(
 ) -> dtos.DefaultCreatedResponse:
     """Create a booking."""
 
-    # TODO: get these details from restaurant service by id
-    max_seats = 30
-    opening_hr, closing_hr = (10, 22)
-    open_days = (1, 1, 1, 1, 1, 1, 0)
-    reservation_time_hr = 2
-    closing_time_buffer_hr = 2
-    restaurant_name = "Test Restaurant"
+    restaurant_data = await restaurant_client.get_restaurant_by_id(
+        restaurant_id=input_dto.restaurant_id,
+    )
+    restaurant_settings = restaurant_data.restaurant_settings
 
     _validate_booking_time(
         input_dto,
-        open_days,
-        opening_hr,
-        closing_hr,
-        closing_time_buffer_hr,
+        restaurant_settings.open_days,
+        restaurant_settings.opening_hr,
+        restaurant_settings.closing_hr,
+        restaurant_settings.closing_time_buffer_hr,
     )
 
-    await _validate_booking_overlap(
+    await _ensure_no_overlap_in_bookings(
         r_dao=r_dao,
         email=input_dto.email,
         restaurant_id=input_dto.restaurant_id,
         booking_time=input_dto.booking_time,
-        reservation_time_hr=reservation_time_hr,
+        reservation_time_hr=restaurant_settings.reservation_time_hr,
     )
 
     await _validate_seat_availability(
         r_dao=r_dao,
         input_dto=input_dto,
-        max_seats=max_seats,
-        reservation_time_hr=reservation_time_hr,
+        max_seats=restaurant_settings.max_seats,
+        reservation_time_hr=restaurant_settings.reservation_time_hr,
     )
 
     booking_id = await w_dao.create(input_dto=input_dto)
@@ -144,7 +144,7 @@ async def create_booking(
         email=input_dto.email,
         full_name=input_dto.full_name,
         phone_number=input_dto.phone_number,
-        restaurant_name=restaurant_name,
+        restaurant_name=restaurant_data.restaurant_name,
         booking_time=input_dto.booking_time,
         confirmation_code=confirmation_code,
         number_of_people=input_dto.number_of_people,
@@ -174,7 +174,7 @@ async def confirm_booking(
     redis: GetRedis,
     rmq: GetRMQ,
     background_tasks: BackgroundTasks,
-) -> None:
+) -> dtos.ValueResponse[bool]:
     """Confirm a booking."""
 
     redis_key = utils.redis_confirmation_key(confirmation_code)
@@ -216,6 +216,8 @@ async def confirm_booking(
         number_of_people=db_booking.number_of_people,
     )
 
+    return dtos.ValueResponse(data=True)
+
 
 @booking_router.get("/{booking_id}")
 async def get_booking(
@@ -250,6 +252,7 @@ async def get_booking_list(
 
 
 base_router_v1.include_router(booking_router)
+base_router.include_router(base_router_v1)
 
 
 #################
@@ -257,7 +260,7 @@ base_router_v1.include_router(booking_router)
 #################
 
 
-@base_router_v1.get("/health")
+@base_router.get("/health")
 async def health_check() -> bool:
     """Return True if the service is healthy."""
 
@@ -271,12 +274,12 @@ async def health_check() -> bool:
 demo_router = APIRouter(prefix="/demo")
 
 
-@demo_router.post("/send-notification")
+@demo_router.post("/send-notification", status_code=201)
 async def send_notification(rmq: GetRMQ) -> bool:
     """Send a notification."""
 
     await rmq.send_confirmation_email(
-        email="martin_laursen9@hotmail.com",
+        email="martin_laursen21@hotmail.com",
         full_name="Martin Laursen",
         restaurant_name="Applebee's",
         booking_time=datetime.now(),
@@ -304,4 +307,4 @@ async def demo_task(
     )
 
 
-base_router_v1.include_router(demo_router)
+base_router.include_router(demo_router)

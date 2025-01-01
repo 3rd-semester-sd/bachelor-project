@@ -25,7 +25,7 @@ async def _init_consumer(
         queue = await channel.declare_queue("notification", durable=False)
         await queue.bind(exchange, routing_key="send_notification_queue")
 
-        async def message_handler(
+        async def _message_handler(
             message: aio_pika.abc.AbstractIncomingMessage,
         ) -> None:
             async with message.process():
@@ -52,7 +52,7 @@ async def _init_consumer(
                     data=NotificationRequestDTO(**data),
                 )
 
-        await queue.consume(message_handler)
+        await queue.consume(_message_handler)
 
 
 async def init_rabbit(

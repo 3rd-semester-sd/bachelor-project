@@ -59,6 +59,12 @@ class DataResponse[T: BaseModel](BaseModel):
     data: T | None = None
 
 
+class ValueResponse[T: str | int | bool](BaseModel):
+    """Default response model returning only a value."""
+
+    data: T | None = None
+
+
 #############
 # Core DTOs #
 #############

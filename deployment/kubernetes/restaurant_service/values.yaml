@@ -1,4 +1,4 @@
-app_name: restaurant
+app_name: restaurant-service
 image: restaurant-image
 container_port: 3000
 

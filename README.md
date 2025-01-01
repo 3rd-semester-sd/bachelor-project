@@ -16,7 +16,7 @@
    ```
 
 
-(Windows) Mart n rebuild Lua scripts
+(Windows) Martin rebuild plugin Lua scripts
 ```
 k delete configmap custom-authsvc-jwt && tilt down && while kga | grep -q "pod"; do sleep 2; done && tilt up
 ```
@@ -29,12 +29,23 @@ az aks get-credentials --resource-group rg-terraform-dev  --name aks-terraform-d
 
 (Docker) build and push images
 ```bash
+cd services/x
 docker build -t mslaursen/x-service:x.x .
 docker push mslaursen/x-service:x.x
+
+# or use this script (replace values as needed)
+./build_and_push.sh mslaursen 0.1
+./build_and_push.sh mslaursen 0.1 notification_service
 ```
 
+(Terraform) deploy all infrastructure
+```bash
+cd deployment/terraform/dev
+terraform init
+terraform apply
+```
 
-(Kubernetes) applying objects and helm charts
+(Kubernetes) install the services into the deployed AKS cluster
 ```bash
 helm install ai-release deployment/charts/base -f deployment/kubernetes/ai_service/values.dev.yaml
 helm install auth-release deployment/charts/base -f deployment/kubernetes/auth_service/values.dev.yaml

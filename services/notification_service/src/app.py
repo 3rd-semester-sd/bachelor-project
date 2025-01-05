@@ -30,7 +30,7 @@ def get_app() -> FastAPI:
     logger.info(
         settings.model_dump_json(indent=2),
     )
-    app = FastAPI(lifespan=lifespan)
+    app = FastAPI(lifespan=lifespan, root_path="/notification-service")
     app.include_router(base_router)
     return app
 

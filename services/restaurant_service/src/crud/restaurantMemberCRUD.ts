@@ -7,17 +7,29 @@ import {
   restaurantMemberDTO,
   restaurantMemberRequestDTO,
 } from "~/dtos/restaurantMemberDTOs";
+import { ElasticsearchService } from "~/services/elasticsearchService";
+import { PostgresService } from "~/services/pgService";
 
-export class RestaurantMenuCRUD extends CRUDBase<
+export class RestaurantMemberCRUD extends CRUDBase<
   typeof restaurantMembersTable,
   typeof restaurantMemberRequestDTO,
   typeof restaurantMemberDTO
 > {
   constructor(fastify: FastifyInstance) {
-    super(
+    // Initialize services with fastify instance
+    const pgService = new PostgresService(
       fastify,
       restaurantMembersTable,
-      "restaurant_members",
+      "member_id"
+    );
+    const esService = new ElasticsearchService<typeof restaurantMemberDTO>(
+      fastify,
+      "restaurant_members"
+    );
+    super(
+      fastify,
+      pgService,
+      esService,
       "member_id",
       restaurantMemberRequestDTO,
       restaurantMemberDTO,
@@ -30,7 +42,7 @@ export class RestaurantMenuCRUD extends CRUDBase<
    */
   protected async onAfterDelete(deletedId: string): Promise<void> {
     const { fastify } = this;
-    
+
     // delete menu related to restaurant
     await this.fastify.elastic.deleteByQuery({
       index: "menus",

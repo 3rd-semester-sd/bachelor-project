@@ -8,6 +8,8 @@ import {
 } from "~/dtos/restaurantMenuItemDTOs";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { PostgresService } from "~/services/pgService";
+import { ElasticsearchService } from "~/services/elasticsearchService";
 
 export class RestaurantMenuItemCRUD extends CRUDBase<
   typeof menuItemsTable,
@@ -15,10 +17,15 @@ export class RestaurantMenuItemCRUD extends CRUDBase<
   typeof restaurantMenuItemDTO
 > {
   constructor(fastify: FastifyInstance) {
+    const pgService = new PostgresService(fastify, menuItemsTable, "item_id");
+    const esService = new ElasticsearchService<typeof restaurantMenuItemDTO>(
+      fastify,
+      "restaurant_menu_items"
+    );
     super(
       fastify,
-      menuItemsTable,
-      "restaurant_menu_items",
+      pgService,
+      esService,
       "item_id",
       restaurantMenuItemRequestDTO,
       restaurantMenuItemDTO,

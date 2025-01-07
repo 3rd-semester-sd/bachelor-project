@@ -7,6 +7,7 @@ export const route: BasePlugin = async (fastify, opts) => {
 
   // register standard CRUD routes
   restaurantMenuCRUD.registerRoutes();
+  
 };
 
 export default route;

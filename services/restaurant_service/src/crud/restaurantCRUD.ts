@@ -6,21 +6,36 @@ import {
   restaurantResponseDTO,
 } from "~/dtos/restaurantDTOs";
 import { CRUDBase } from "./baseCRUD";
+import { PostgresService } from "~/services/pgService";
+import { ElasticsearchService } from "~/services/elasticsearchService";
 
 export class RestaurantCRUD extends CRUDBase<
   typeof restaurantsTable,
   typeof restaurantRequestDTO,
   typeof restaurantResponseDTO
 > {
-  constructor(fastify: FastifyInstance) {
+  private settingsPgService: PostgresService<typeof restaurantSettingsTable>;
+
+  constructor(
+    fastify: FastifyInstance,
+    pgService: PostgresService<typeof restaurantsTable>,
+    esService: ElasticsearchService<typeof restaurantResponseDTO>
+  ) {
     super(
       fastify,
-      restaurantsTable,
-      "restaurants",
+      pgService,
+      esService,
       "restaurant_id",
       restaurantRequestDTO,
       restaurantResponseDTO,
       ["Restaurant"]
+    );
+
+    // Initialize additional services
+    this.settingsPgService = new PostgresService(
+      fastify,
+      restaurantSettingsTable,
+      "restaurant_id"
     );
   }
 
@@ -34,32 +49,26 @@ export class RestaurantCRUD extends CRUDBase<
     res: FastifyReply
   ) {
     try {
-      const { db, elastic, amqp } = this.fastify;
+      const { amqp } = this.fastify;
 
       // Start transaction
-      const result = await db.transaction(async (tx) => {
+      const result = await this.pgService.transaction(async (tx) => {
         // 1) Insert into main "restaurants" table:
-        const inserted = await tx
-          .insert(this.table)
-          .values(req.body)
-          .returning({
-            [this.idField]: (this.table as any)[this.idField],
-          });
+        const inserted = await this.pgService.create(req.body, tx);
 
-        const newRestaurantId = inserted[0][this.idField];
+        const newRestaurantId = inserted[this.idField];
 
         // 2) Insert into the "restaurant_settings" table:
-        await tx.insert(restaurantSettingsTable).values({
-          restaurant_id: newRestaurantId,
-          ...req.body.restaurant_settings,
-        });
+        await this.settingsPgService.create(
+          {
+            restaurant_id: newRestaurantId,
+            ...req.body.restaurant_settings,
+          },
+          tx
+        );
 
         // 3) Index in Elasticsearch:
-        await elastic.index({
-          index: this.esIndex,
-          id: newRestaurantId,
-          document: req.body,
-        });
+        await this.esService.create(newRestaurantId, req.body);
 
         // 4) Publish RabbitMQ message:
         const msg = {
@@ -93,10 +102,10 @@ export class RestaurantCRUD extends CRUDBase<
       });
 
       // Return the newly created ID
-      return res.status(200).send({ data: result[0][this.idField] });
+      return res.status(200).send({ data: result[this.idField] });
     } catch (e) {
       this.fastify.log.error(
-        `Error in POST /${this.esIndex}: ${(e as Error).message}`
+        `Error in POST /${this.esService.index}: ${(e as Error).message}`
       );
       return res
         .status(500)
@@ -126,6 +135,7 @@ export class RestaurantCRUD extends CRUDBase<
           },
         },
       });
+
       if (result._source.menu_items) {
         const menu_items = result._source.menu_items;
         for (const item of menu_items) {

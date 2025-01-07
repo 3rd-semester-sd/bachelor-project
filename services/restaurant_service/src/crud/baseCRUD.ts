@@ -1,5 +1,4 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { paginationDTO } from "~/dtos/requestDTOs";
 import {
@@ -8,6 +7,8 @@ import {
   paginatedDataListResponseDTO,
 } from "~/dtos/responseDTOs";
 import { AnyPgTable } from "drizzle-orm/pg-core";
+import { PostgresService } from "~/services/pgService";
+import { ElasticsearchService } from "~/services/elasticsearchService";
 
 type ResponseSchema = z.ZodObject<any>;
 type RequestSchema = z.ZodObject<any>;
@@ -18,14 +19,17 @@ export class CRUDBase<
   R extends ResponseSchema,
 > {
   constructor(
-    protected fastify: FastifyInstance,
-    protected table: M,
-    protected esIndex: string,
+    public fastify: FastifyInstance,
+    protected pgService: PostgresService<M>,
+    protected esService: ElasticsearchService<T>,
     protected idField: string,
     protected requestDTO: T,
     protected responseDTO: R,
     protected tags: string[]
-  ) {}
+  ) {
+    this.pgService = pgService; // store the instance
+    this.esService = esService;
+  }
   /**
    * Hook that runs *after* successfully creating a record in DB.
    * By default, it does nothing. Derived classes can override this.
@@ -55,13 +59,11 @@ export class CRUDBase<
     const offset = (page - 1) * pageSize;
 
     try {
-      const esResult = await this.fastify.elastic.search<T>({
-        index: this.esIndex,
-        query: { match_all: {} },
-        from: offset,
-        size: pageSize,
-      });
-
+      const esResult = await this.esService.search(
+        { match_all: {} },
+        offset,
+        pageSize
+      );
       return this.formatPaginatedResponse(esResult, page, pageSize);
     } catch (e) {
       return res.status(500).send({ error: `something went wrong: ${e}` });
@@ -75,14 +77,13 @@ export class CRUDBase<
     const { id } = req.params;
 
     try {
-      const esResult = await this.fastify.elastic.search<T>({
-        index: this.esIndex,
-        query: { match: { _id: id } },
-      });
+      const esResult = await this.esService.getById(id);
 
       const result = esResult.hits.hits;
       if (result.length === 0) {
-        return res.status(404).send({ error: `No ${this.esIndex} found.` });
+        return res
+          .status(404)
+          .send({ error: `No ${this.esService.index} found.` });
       }
 
       const data = result.map((hit) => ({
@@ -97,33 +98,24 @@ export class CRUDBase<
 
   async handleCreate(req: FastifyRequest, res: FastifyReply) {
     try {
-      const result = await this.fastify.db.transaction(async (tx) => {
-        const inserted = await tx
-          .insert(this.table)
-          .values(req.body as M["$inferInsert"])
-          .returning({
-            [this.idField]: (this.table as unknown as Record<string, any>)[
-              this.idField
-            ],
-          });
+      const result = await this.pgService.transaction(async (tx) => {
+        const inserted = await this.pgService.create(
+          req.body as M["$inferInsert"],
+          tx
+        );
 
-        const insertedId = inserted[0][this.idField];
+        const insertedId = inserted[this.idField];
 
-        await this.fastify.elastic.index({
-          index: this.esIndex,
-          id: insertedId,
-          document: req.body,
-        });
-
-        await this.onAfterCreate(insertedId, inserted, req);
+        await this.esService.create(insertedId, req.body);
+        await this.onAfterCreate(insertedId, inserted.id, req);
 
         return inserted;
       });
 
-      return res.status(200).send({ data: result[0][this.idField] });
+      return res.status(200).send({ data: result[this.idField] });
     } catch (e) {
       this.fastify.log.error(
-        `Error in POST /${this.esIndex}: ${(e as Error).message}`
+        `Error in POST /${this.esService.index}: ${(e as Error).message}`
       );
       return res
         .status(500)
@@ -139,24 +131,20 @@ export class CRUDBase<
     const updateData = req.body;
 
     try {
-      await this.fastify.db.transaction(async (tx) => {
-        const result = await tx
-          .update(this.table)
-          .set(updateData as Partial<M["$inferInsert"]>)
-          .where(
-            eq((this.table as unknown as Record<string, any>)[this.idField], id)
-          )
-          .returning();
+      await this.pgService.transaction(async (tx) => {
+        const result = await this.pgService.update(
+          id,
+          updateData as Partial<M["$inferInsert"]>,
+          tx
+        );
 
         if (result.length === 0) {
-          return res.status(404).send({ error: `No ${this.esIndex} found.` });
+          return res
+            .status(404)
+            .send({ error: `No ${this.esService.index} found.` });
         }
 
-        await this.fastify.elastic.update({
-          index: this.esIndex,
-          id: id,
-          doc: updateData,
-        });
+        await this.esService.update(id, updateData);
 
         await this.onAfterUpdate(id, result, req);
       });
@@ -173,22 +161,16 @@ export class CRUDBase<
     const { id } = req.params;
 
     try {
-      await this.fastify.db.transaction(async (tx) => {
-        const result = await tx
-          .delete(this.table)
-          .where(
-            eq((this.table as unknown as Record<string, any>)[this.idField], id)
-          )
-          .returning();
+      await this.pgService.transaction(async (tx) => {
+        const result = await this.pgService.delete(id, tx);
 
         if (result.length === 0) {
-          return res.status(404).send({ error: `No ${this.esIndex} found.` });
+          return res
+            .status(404)
+            .send({ error: `No ${this.esService.index} found.` });
         }
 
-        await this.fastify.elastic.delete({
-          index: this.esIndex,
-          id: id,
-        });
+        await this.esService.delete(id);
 
         await this.onAfterDelete(id);
       });
@@ -198,7 +180,7 @@ export class CRUDBase<
     }
   }
 
-  private formatPaginatedResponse(
+  public formatPaginatedResponse(
     esResult: any,
     page: number,
     pageSize: number

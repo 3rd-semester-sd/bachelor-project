@@ -6,6 +6,8 @@ import {
   restaurantMenuDTO,
   restaurantMenuRequestDTO,
 } from "~/dtos/restaurantMenuDTOs";
+import { PostgresService } from "~/services/pgService";
+import { ElasticsearchService } from "~/services/elasticsearchService";
 
 export class RestaurantMenuCRUD extends CRUDBase<
   typeof menusTable,
@@ -13,10 +15,15 @@ export class RestaurantMenuCRUD extends CRUDBase<
   typeof restaurantMenuDTO
 > {
   constructor(fastify: FastifyInstance) {
+    const pgService = new PostgresService(fastify, menusTable, "menu_id");
+    const esService = new ElasticsearchService<typeof restaurantMenuDTO>(
+      fastify,
+      "restaurant_menu"
+    );
     super(
       fastify,
-      menusTable,
-      "restaurant_menu",
+      pgService,
+      esService,
       "menu_id",
       restaurantMenuRequestDTO,
       restaurantMenuDTO,
@@ -29,7 +36,6 @@ export class RestaurantMenuCRUD extends CRUDBase<
    */
   protected async onAfterDelete(deletedId: string): Promise<void> {
     const { fastify } = this;
-
     const checkItems = await this.fastify.elastic.search({
       index: "restaurant_menu_items",
       query: {

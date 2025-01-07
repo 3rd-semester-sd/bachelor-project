@@ -62,7 +62,7 @@ def generate_additional_fields() -> dict[str, Any]:
         "restaurant_address": address,
         "restaurant_location": location,
         "cuisine_type": cuisine_type,
-        "member_id": "748a6340-55c2-41a3-8c06-352a984bf15d",
+        "member_id": "6ad913fc-7767-4410-933d-a951ed2620d4",
     }
 
 

@@ -36,6 +36,7 @@ fastify.register(fastifySwagger, {
       version: "0.0.1",
     },
     servers: [],
+  
   },
   transform: jsonSchemaTransform,
 });

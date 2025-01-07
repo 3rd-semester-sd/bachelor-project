@@ -27,7 +27,7 @@ def get_app() -> FastAPI:
         settings.model_dump_json(indent=2),
     )
 
-    app = FastAPI(lifespan=lifespan)
+    app = FastAPI(lifespan=lifespan, root_path="/auth-service")
     app.include_router(base_router)
     return app
 

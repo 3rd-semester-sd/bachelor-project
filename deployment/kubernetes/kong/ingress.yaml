@@ -128,3 +128,23 @@ spec:
             name: restaurant-service
             port:
               number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: restaurant-service-ingress-protected
+  annotations:
+    konghq.com/strip-path: "true"
+    konghq.com/plugins: custom-authsvc-jwt
+spec:
+  ingressClassName: kong
+  rules:
+  - http:
+      paths:
+      - path: /restaurant-service/api/restaurant-members/protected
+        pathType: Prefix
+        backend:
+          service:
+            name: restaurant-service
+            port:
+              number: 80

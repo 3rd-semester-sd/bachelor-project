@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@elastic/elasticsearch':
+        specifier: ^8.17.0
+        version: 8.17.0
       '@fastify/autoload':
         specifier: ^6.0.2
         version: 6.0.2

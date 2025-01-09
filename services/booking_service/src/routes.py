@@ -1,17 +1,19 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Header
 
 from enums import BookingStatus
 from services.rabbit.dependencies import GetRMQ
-from services.restaurant_client.client import GetRestaurantClient
+from services.http_client.dependencies import GetRestaurantClient
 import daos
 import dtos
 import exceptions
+from models import Booking
 from uuid import UUID
 from services.redis.dependencies import GetRedis
 from datetime import datetime
 from constants import BOOKING_CONFIRMATION_EXPIRE_SECONDS
 from fastapi import BackgroundTasks
 import tasks
+import sqlalchemy as sa
 
 import utils
 
@@ -24,7 +26,7 @@ base_router_v1 = APIRouter(prefix="/v1")
 ##################
 
 
-booking_router = APIRouter(prefix="/booking")
+booking_router = APIRouter(prefix="/bookings")
 
 
 def _validate_booking_time(
@@ -159,6 +161,7 @@ async def create_booking(
         r_dao=r_dao,
         w_dao=w_dao,
         rmq=rmq,
+        restaurant_client=restaurant_client,
     )
 
     return dtos.DefaultCreatedResponse(
@@ -169,6 +172,7 @@ async def create_booking(
 @booking_router.patch("/{confirmation_code}")
 async def confirm_booking(
     confirmation_code: str,
+    restaurant_client: GetRestaurantClient,
     r_dao: daos.GetDAORO,
     w_dao: daos.GetDAO,
     redis: GetRedis,
@@ -183,7 +187,10 @@ async def confirm_booking(
     if not val:
         raise exceptions.Http403("Invalid confirmation code, or expired.")
 
-    booking_id = UUID(val.decode())
+    try:
+        booking_id = UUID(val.decode())
+    except ValueError:
+        raise exceptions.Http403("Unexpected error.")
 
     db_booking = await r_dao.filter_one(id=booking_id)
 
@@ -193,8 +200,9 @@ async def confirm_booking(
     if db_booking.status != BookingStatus.PENDING:
         raise exceptions.Http403("Cannot confirm non-pending booking.")
 
-    # TODO: get restaurant from restaurant service
-    restaurant_name = "Test Restaurant"
+    restaurant = await restaurant_client.get_restaurant_by_id(
+        restaurant_id=db_booking.restaurant_id,
+    )
 
     await w_dao.update(
         id=booking_id,
@@ -211,7 +219,7 @@ async def confirm_booking(
         email=db_booking.email,
         full_name=db_booking.full_name,
         phone_number=db_booking.phone_number,
-        restaurant_name=restaurant_name,
+        restaurant_name=restaurant.restaurant_name,
         booking_time=db_booking.booking_time,
         number_of_people=db_booking.number_of_people,
     )
@@ -219,10 +227,12 @@ async def confirm_booking(
     return dtos.ValueResponse(data=True)
 
 
-@booking_router.get("/{booking_id}")
+@booking_router.get("/protected/{booking_id}")
 async def get_booking(
     booking_id: UUID,
+    restaurant_client: GetRestaurantClient,
     r_dao: daos.GetDAORO,
+    user_id: UUID = Header("x-user-id"),
 ) -> dtos.DataResponse[dtos.BookingDTO]:
     """Get a booking."""
 
@@ -231,21 +241,37 @@ async def get_booking(
     if db_booking is None:
         raise exceptions.Http404("Booking not found.")
 
+    await restaurant_client.verify_membership(
+        user_id=user_id,
+        restaurant_id=db_booking.restaurant_id,
+    )
+
     return dtos.DataResponse(
         data=dtos.BookingDTO.model_validate(db_booking),
     )
 
 
-@booking_router.get("")
-async def get_booking_list(
+@booking_router.get("/protected/restaurant/{restaurant_id}")
+async def get_bookings_by_restaurant(
+    restaurant_id: UUID,
     r_dao: daos.GetDAORO,
+    restaurant_client: GetRestaurantClient,
     pagination: dtos.Pagination,
+    user_id: UUID = Header("x-user-id"),
 ) -> dtos.OffsetResults[dtos.BookingDTO]:
     """Get bookings."""
+
+    await restaurant_client.verify_membership(
+        user_id=user_id,
+        restaurant_id=restaurant_id,
+    )
 
     results = await r_dao.get_offset_results(
         out_dto=dtos.BookingDTO,
         pagination=pagination,
+        query=sa.select(Booking).where(
+            Booking.restaurant_id == restaurant_id,
+        ),
     )
 
     return results

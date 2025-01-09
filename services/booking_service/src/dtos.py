@@ -12,6 +12,8 @@ from pydantic import computed_field
 
 
 # Base
+
+
 class BaseOrmModel(BaseModel):
     """BaseOrmModel."""
 

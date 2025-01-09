@@ -1,22 +1,23 @@
 from httpx import AsyncClient
 from typing import Annotated, Any, AsyncGenerator
 from fastapi import Depends
+
 import exceptions
 from settings import settings
-from uuid import UUID, uuid4
+from uuid import UUID
 from pydantic import BaseModel
+from fastapi import Request
 
 
-async def get_http_client() -> AsyncGenerator[AsyncClient, None]:
+async def get_http_client(request: Request) -> AsyncGenerator[AsyncClient, None]:
     """Get an HTTP client."""
-    async with AsyncClient() as client:
-        yield client
+    yield request.app.state.http_client
 
 
 GetHTTPClient = Annotated[AsyncClient, Depends(get_http_client)]
 
 
-class ResturantSettingsDTO(BaseModel):
+class RestaurantSettingsDTO(BaseModel):
     """Restaurant settings DTO."""
 
     max_seats: int
@@ -27,12 +28,12 @@ class ResturantSettingsDTO(BaseModel):
     closing_time_buffer_hr: int
 
 
-class RestaurantReponseDTO(BaseModel):
+class RestaurantResponseDTO(BaseModel):
     """Restaurant response DTO."""
 
     restaurant_id: UUID
     restaurant_name: str
-    restaurant_settings: ResturantSettingsDTO
+    restaurant_settings: RestaurantSettingsDTO
 
 
 class RestaurantClient:
@@ -66,29 +67,56 @@ class RestaurantClient:
         except Exception as e:
             raise exceptions.Http500(f"Failed to make request: {e}")
 
-        data = None
+        json = None
         try:
-            data = response.json()
+            json = response.json()
         except Exception as e:
             raise exceptions.Http500(f"Failed to parse response: {e}")
 
-        if data is None:
+        if json is None:
             raise exceptions.Http500("Failed to parse response: no data")
 
-        return data
+        if response.status_code != 200:
+            raise exceptions.Http500(
+                f"Failed to make request: {json.get('error', 'No error message')}"
+            )
+
+        return json
 
     async def get_restaurant_by_id(
         self,
         restaurant_id: UUID,
-    ) -> RestaurantReponseDTO:
+    ) -> RestaurantResponseDTO:
         """Get a restaurant by ID."""
 
-        data = await self._base_request(
+        response_json = await self._base_request(
             method="GET",
-            url=settings.restaurant_service_url + str(restaurant_id),
+            url=f"{settings.restaurant_service_url}/api/restaurants/{restaurant_id}",
         )
 
-        return RestaurantReponseDTO.model_validate(data["data"])
+        if "data" not in response_json:
+            raise exceptions.Http500("Invalid response format")
+
+        return RestaurantResponseDTO.model_validate(response_json["data"])
+
+    async def verify_membership(
+        self,
+        user_id: UUID,
+        restaurant_id: UUID,
+    ) -> None:
+        """Verify that a user is a member of a restaurant."""
+
+        response_json = await self._base_request(
+            method="GET",
+            url=f"{settings.restaurant_service_url}/api/restaurants"
+            f"/{restaurant_id}/members/{user_id}",
+        )
+
+        if "data" not in response_json:
+            raise exceptions.Http500("Invalid response format")
+
+        if response_json["data"] is False:
+            raise exceptions.Http403("User is not a member of the restaurant")
 
 
 GetRestaurantClient = Annotated[RestaurantClient, Depends()]

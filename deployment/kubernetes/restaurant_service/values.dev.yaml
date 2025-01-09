@@ -1,5 +1,5 @@
 app_name: restaurant-service
-image: msalursen/restaurant-service:0.1
+image: mslaursen/restaurant-service:0.3
 container_port: 3000
 namespace: default
 
@@ -10,6 +10,12 @@ env:
   restaurant_service_log_level: "info"
   restaurant_service_reload: "true"
   restaurant_database_url: "postgresql://bachelor@pg-kea-bachelor-restaurant:P@ssw0rd@pg-kea-bachelor-restaurant.postgres.database.azure.com:5432/restaurant-db"
+  restaurant_es_url: "http://elasticsearch:9200"
+  restaurant_rabbit_hostname: "rabbitmq"
+  restaurant_rabbit_port: 5672
+  restaurant_rabbit_username: "user"
+  restaurant_rabbit_password: "password"
+  node_env: "DEV"
 resources:
   requests:
     memory: "128Mi"

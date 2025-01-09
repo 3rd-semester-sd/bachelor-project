@@ -69,3 +69,4 @@ module "postgres-restaurant" {
   create_database     = local.restaurant_service_create_database
 }
 
+resource "postgresql_exten"

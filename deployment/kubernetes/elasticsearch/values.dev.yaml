@@ -5,8 +5,8 @@ image:
   debug: false
 
 master:
-  masterOnly: yes
-  replicaCount: 0
+  masterOnly: false
+  replicaCount: 1
 data:
   replicaCount: 0
 coordinating:

@@ -1,5 +1,6 @@
 CREATE TYPE "public"."cuisineTypeEnum" AS ENUM('italian', 'japanese', 'mexican', 'indian', 'french');--> statement-breakpoint
 CREATE TYPE "public"."menuCategoryEnum" AS ENUM('appetizer', 'main_dish', 'sides', 'desserts');--> statement-breakpoint
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";--> statement-breakpoint
 CREATE TABLE "menu_items" (
 	"item_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"menu_id" uuid,

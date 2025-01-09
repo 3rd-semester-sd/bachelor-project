@@ -10,10 +10,11 @@ resource "azurerm_postgresql_server" "primary" {
   geo_redundant_backup_enabled = false
   auto_grow_enabled            = true
 
-  administrator_login          = var.admin_login
-  administrator_login_password = var.admin_password
-  version                      = "9.5"
-  ssl_enforcement_enabled      = true
+  administrator_login              = var.admin_login
+  administrator_login_password     = var.admin_password
+  version                          = "9.5"
+  ssl_minimal_tls_version_enforced = "TLSEnforcementDisabled"
+  ssl_enforcement_enabled          = false
 }
 
 resource "azurerm_postgresql_server" "replica" {
@@ -32,10 +33,11 @@ resource "azurerm_postgresql_server" "replica" {
   geo_redundant_backup_enabled = false
   auto_grow_enabled            = true
 
-  administrator_login          = var.admin_login
-  administrator_login_password = var.admin_password
-  version                      = "9.5"
-  ssl_enforcement_enabled      = true
+  administrator_login              = var.admin_login
+  administrator_login_password     = var.admin_password
+  version                          = "9.5"
+  ssl_minimal_tls_version_enforced = "TLSEnforcementDisabled"
+  ssl_enforcement_enabled          = false
 
   create_mode               = "Replica"
   creation_source_server_id = azurerm_postgresql_server.primary.id

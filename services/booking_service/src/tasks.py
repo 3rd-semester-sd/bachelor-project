@@ -6,6 +6,7 @@ from loguru import logger
 import dtos
 from typing import Any, Callable
 from services.rabbit.dependencies import RMQService
+from services.http_client.dependencies import RestaurantClient
 
 
 async def delay_task(
@@ -28,6 +29,7 @@ async def verify_booking_status(
     r_dao: daos.BookingReadDAO,
     w_dao: daos.BookingWriteDAO,
     rmq: RMQService,
+    restaurant_client: RestaurantClient,
 ) -> None:
     """Verify the status of a booking."""
     db_booking = await r_dao.filter_one(id=booking_id)
@@ -44,8 +46,9 @@ async def verify_booking_status(
         logger.error(f"Booking {booking_id} is already confirmed.")
         return
 
-    # TODO: get restaurant from restaurant service
-    restaurant_name = "Test Restaurant"
+    restaurant = await restaurant_client.get_restaurant_by_id(
+        restaurant_id=db_booking.restaurant_id,
+    )
 
     # if the booking is still pending, reject it.
     await w_dao.update(
@@ -59,7 +62,7 @@ async def verify_booking_status(
         email=db_booking.email,
         full_name=db_booking.full_name,
         phone_number=db_booking.phone_number,
-        restaurant_name=restaurant_name,
+        restaurant_name=restaurant.restaurant_name,
         booking_time=db_booking.booking_time,
         number_of_people=db_booking.number_of_people,
     )

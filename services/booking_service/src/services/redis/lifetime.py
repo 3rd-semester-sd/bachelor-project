@@ -9,3 +9,9 @@ def setup_redis(app: FastAPI) -> None:
         str(settings.redis.url),
         auto_close_connection_pool=False,
     )
+
+
+async def shutdown_redis(app: FastAPI) -> None:
+    """Shutdown Redis."""
+    redis: Redis = app.state.redis
+    await redis.close()

@@ -11,6 +11,7 @@ from routes import base_router
 from db import db_lifetime
 from loguru import logger
 from services.redis import lifetime as redis_lifetime
+from services.http_client import lifetime as http_client_lifetime
 
 
 @asynccontextmanager
@@ -21,25 +22,26 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info(settings.pg_ro.url)
     await db_lifetime.setup_db_ro(app)
     await db_lifetime.setup_db(app)
-
+    await http_client_lifetime.init_http_client(app)
     redis_lifetime.setup_redis(app)
-
     init_rabbit(app)
 
     yield
 
     await db_lifetime.shutdown_db_ro(app)
     await db_lifetime.shutdown_db(app)
-
+    await http_client_lifetime.shutdown_http_client(app)
+    await redis_lifetime.shutdown_redis(app)
     await shutdown_rabbit(app)
 
 
 def get_app() -> FastAPI:
-    print(
+    """Get FastAPI app."""
+    logger.info(
         settings.model_dump_json(indent=2),
     )
 
-    app = FastAPI(lifespan=lifespan)
+    app = FastAPI(lifespan=lifespan, root_path="/booking-service")
     app.include_router(base_router)
     return app
 

@@ -36,7 +36,7 @@ class RestaurantResponseDTO(BaseModel):
     restaurant_settings: RestaurantSettingsDTO
 
 
-class HttpClient:
+class RestaurantClient:
     """HTTP client."""
 
     def __init__(self, client: GetHTTPClient) -> None:
@@ -119,4 +119,4 @@ class HttpClient:
             raise exceptions.Http403("User is not a member of the restaurant")
 
 
-GetRestaurantClient = Annotated[HttpClient, Depends()]
+GetRestaurantClient = Annotated[RestaurantClient, Depends()]

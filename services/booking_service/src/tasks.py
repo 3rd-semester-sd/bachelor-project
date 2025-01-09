@@ -6,7 +6,7 @@ from loguru import logger
 import dtos
 from typing import Any, Callable
 from services.rabbit.dependencies import RMQService
-from services.http_client.dependencies import HttpClient
+from services.http_client.dependencies import RestaurantClient
 
 
 async def delay_task(
@@ -29,7 +29,7 @@ async def verify_booking_status(
     r_dao: daos.BookingReadDAO,
     w_dao: daos.BookingWriteDAO,
     rmq: RMQService,
-    restaurant_client: HttpClient,
+    restaurant_client: RestaurantClient,
 ) -> None:
     """Verify the status of a booking."""
     db_booking = await r_dao.filter_one(id=booking_id)

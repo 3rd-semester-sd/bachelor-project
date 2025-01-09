@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI):
         pass  # Task was cancelled
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, root_path="/ai-service")
 
 
 @app.get("/api/health")
@@ -45,4 +45,4 @@ async def health():
 
 
 app.include_router(prefix="/api", router=chat_router)
-app.include_router(prefix="/api",router=embedding_router)
+app.include_router(prefix="/api", router=embedding_router)

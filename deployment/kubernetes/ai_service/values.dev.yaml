@@ -1,5 +1,5 @@
 app_name: ai-service
-image: mslaursen/ai-service:0.1
+image: mslaursen/ai-service:0.2
 container_port: 8089
 namespace: default
 

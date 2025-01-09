@@ -62,7 +62,7 @@ def generate_additional_fields() -> dict[str, Any]:
         "restaurant_address": address,
         "restaurant_location": location,
         "cuisine_type": cuisine_type,
-        "member_id": "6ad913fc-7767-4410-933d-a951ed2620d4",
+        "member_id": "0969345c-1ac5-4078-83eb-b597ecf04160",
     }
 
 
@@ -85,7 +85,7 @@ def main():
     json_file_path = "./test_data/restaurants.json"
     restaurants = load_restaurants_from_json(json_file_path)
 
-    endpoint_url = "http://localhost:3000/api/restaurants"
+    endpoint_url = "http://57.153.96.127/restaurant-service/api/restaurants"
 
     for restaurant_input in restaurants:
         # Generate additional fields

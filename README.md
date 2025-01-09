@@ -29,13 +29,15 @@ az aks get-credentials --resource-group rg-terraform-dev  --name aks-terraform-d
 
 (Docker) build and push images
 ```bash
-cd services/x
+cd services/x-service
 docker build -t mslaursen/x-service:x.x .
 docker push mslaursen/x-service:x.x
 
 # or use this script (replace values as needed)
+# build and push all services to :0.1
 ./build_and_push.sh mslaursen 0.1
-./build_and_push.sh mslaursen 0.1 notification_service
+# build and push a specific service to :0.1
+./build_and_push.sh mslaursen 0.1 x_service
 ```
 
 (Terraform) deploy all infrastructure

@@ -19,11 +19,11 @@ const fastify = Fastify({
   logger:
     process.env.NODE_ENV === "DEV"
       ? {
-          level: "info",
-          transport: {
-            target: "pino-pretty", // human-readable logs in development
-          },
-        }
+        level: "info",
+        transport: {
+          target: "pino-pretty", // human-readable logs in development
+        },
+      }
       : true, // default logs for prod
   bodyLimit: 1024 * 1024 * 1024,
 });
@@ -35,8 +35,11 @@ fastify.register(fastifySwagger, {
       description: "Resturant API",
       version: "0.0.1",
     },
-    servers: [],
-  
+    servers: [
+      {
+        url: '/restaurant-service'
+      }
+    ],
   },
   transform: jsonSchemaTransform,
 });
@@ -108,6 +111,6 @@ void fastify.register(AutoLoad, {
   dirNameRoutePrefix: (folderParent, folderName) => {
     return `api/${folderName.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase()}`;
   },
+  prefix: "restaurant-service"
 });
-
 export const app = fastify.withTypeProvider<ZodTypeProvider>();

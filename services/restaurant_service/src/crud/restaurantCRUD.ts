@@ -54,7 +54,14 @@ export class RestaurantCRUD extends CRUDBase<
       // Start transaction
       const result = await this.pgService.transaction(async (tx) => {
         // 1) Insert into main "restaurants" table:
-        const inserted = await this.pgService.create(req.body, tx);
+
+        const user_id = req.headers["x-user-id"] as string;
+        console.log(user_id);
+        console.log(req.headers);
+        const inserted = await this.pgService.create(
+          { member_id: user_id, ...req.body },
+          tx
+        );
 
         const newRestaurantId = inserted[this.idField];
 

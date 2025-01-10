@@ -22,12 +22,11 @@ export const restaurantResponseDTO = z.object({
   // embedding: z.array(z.number()).optional().nullable(),
 });
 
-export const restaurantRequestDTO = restaurantResponseDTO
-  .omit({
-    restaurant_id: true,
-    // embedding: true,
-  })
-  .extend({ member_id: z.string().uuid() });
+export const restaurantRequestDTO = restaurantResponseDTO.omit({
+  restaurant_id: true,
+  member_id: true,
+  // embedding: true,
+});
 
 export type RestaurantSettingDTO = z.infer<typeof restaurantSettingDTO>;
 export type RestaurantResponseDTO = z.infer<typeof restaurantResponseDTO>;

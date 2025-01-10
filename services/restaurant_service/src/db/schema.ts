@@ -45,12 +45,12 @@ export const restaurantsTable = pgTable(
   "restaurants",
   {
     restaurant_id: uuid().primaryKey().defaultRandom(),
-    member_id: uuid()
-      .references(() => restaurantMembersTable.member_id, {
-        onDelete: "cascade",
-        onUpdate: "cascade",
-      })
-      .notNull(),
+    // member_id: uuid()
+    //   .references(() => restaurantMembersTable.member_id, {
+    //     onDelete: "cascade",
+    //     onUpdate: "cascade",
+    //   })
+    //   .notNull(),
     restaurant_name: varchar({ length: 255 }).notNull(),
     restaurant_address: varchar({ length: 255 }).notNull(),
     restaurant_location: varchar({ length: 255 }).notNull(),
@@ -59,16 +59,7 @@ export const restaurantsTable = pgTable(
     restaurant_status: restaurantStatusPgEnum().default(
       RestaurantStatus.PENDING
     ),
-  },
-  (t) => [
-    {
-      pk: primaryKey({ columns: [t.member_id, t.restaurant_name] }),
-      pkWithCustomName: primaryKey({
-        name: "pk_member_id_restaurant_name",
-        columns: [t.member_id, t.restaurant_name],
-      }),
-    },
-  ]
+  }
 );
 
 export const menusTable = pgTable("menus", {

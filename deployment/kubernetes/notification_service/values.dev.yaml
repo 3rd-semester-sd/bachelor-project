@@ -1,5 +1,5 @@
 app_name: notification-service
-image: mslaursen/notification-service:0.1
+image: mslaursen/notification-service:0.9
 container_port: 8001
 namespace: default
 

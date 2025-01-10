@@ -1,7 +1,13 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
+from fastapi.security import HTTPBearer
+from typing import Annotated
 from loguru import logger
 from services.email_service import email_service
 from dtos import EmailDTO
+
+
+security = HTTPBearer()
+Auth = Annotated[str, Depends(security)]
 
 
 base_router = APIRouter(prefix="/api")
@@ -19,10 +25,13 @@ async def health_check() -> bool:
 
 
 @base_router.get("/protected/authsvc")
-async def test_authsvc(request: Request) -> bool:
+async def test_authsvc(
+    request: Request,
+    token: Auth,
+) -> str:
     """Test authsvc."""
-    logger.info(f"Request: {request.headers}")
-    return True
+    logger.info(f"Request: {request.headers}, Token: {token}")
+    return f"User ID: {request.headers.get("x-user-id")}"
 
 
 @base_router.get("/send-notification-demo")

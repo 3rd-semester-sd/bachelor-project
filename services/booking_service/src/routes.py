@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Header
+from fastapi import APIRouter, Depends, Request
+from fastapi.security import HTTPBearer
+from typing import Annotated
 
 from enums import BookingStatus
 from services.rabbit.dependencies import GetRMQ
@@ -16,6 +18,9 @@ import tasks
 import sqlalchemy as sa
 
 import utils
+
+security = HTTPBearer()
+Auth = Annotated[str, Depends(security)]
 
 base_router = APIRouter(prefix="/api")
 base_router_v1 = APIRouter(prefix="/v1")
@@ -227,12 +232,21 @@ async def confirm_booking(
     return dtos.ValueResponse(data=True)
 
 
+def _get_x_user_id(request: Request) -> UUID:
+    """Get the user ID from the request headers."""
+    try:
+        return UUID(request.headers.get("x-user-id"))
+    except ValueError:
+        raise exceptions.Http403("Invalid user ID.")
+
+
 @booking_router.get("/protected/{booking_id}")
 async def get_booking(
     booking_id: UUID,
+    request: Request,
     restaurant_client: GetRestaurantClient,
     r_dao: daos.GetDAORO,
-    user_id: UUID = Header("x-user-id"),
+    _: Auth,
 ) -> dtos.DataResponse[dtos.BookingDTO]:
     """Get a booking."""
 
@@ -242,7 +256,7 @@ async def get_booking(
         raise exceptions.Http404("Booking not found.")
 
     await restaurant_client.verify_membership(
-        user_id=user_id,
+        user_id=_get_x_user_id(request),
         restaurant_id=db_booking.restaurant_id,
     )
 
@@ -254,15 +268,16 @@ async def get_booking(
 @booking_router.get("/protected/restaurant/{restaurant_id}")
 async def get_bookings_by_restaurant(
     restaurant_id: UUID,
+    request: Request,
     r_dao: daos.GetDAORO,
     restaurant_client: GetRestaurantClient,
     pagination: dtos.Pagination,
-    user_id: UUID = Header("x-user-id"),
+    _: Auth,
 ) -> dtos.OffsetResults[dtos.BookingDTO]:
-    """Get bookings."""
+    """Get bookings by restaurant."""
 
     await restaurant_client.verify_membership(
-        user_id=user_id,
+        user_id=_get_x_user_id(request),
         restaurant_id=restaurant_id,
     )
 

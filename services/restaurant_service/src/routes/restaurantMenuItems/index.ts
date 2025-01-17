@@ -1,15 +1,14 @@
 import { BasePlugin } from "~/types/BasePlugin";
-import { RestaurantMemberCRUD } from "~/crud/restaurantMemberCRUD";
+import { RestaurantMenuItemCRUD } from "~/crud/restaurantMenuItemCRUD";
+import { paginationDTO } from "~/dtos/requestDTOs";
 import {
   dataResponseDTO,
   paginatedDataListResponseDTO,
 } from "~/dtos/responseDTOs";
-import { paginationDTO } from "~/dtos/requestDTOs";
 import { z } from "zod";
 
 export const route: BasePlugin = async (fastify, opts) => {
-  const restaurantMembersCRUD = new RestaurantMemberCRUD(fastify);
-
+  const restaurantMenuItemCRUD = new RestaurantMenuItemCRUD(fastify);
   const commonResponses = {
     500: z.object({ error: z.string() }),
   };
@@ -18,28 +17,28 @@ export const route: BasePlugin = async (fastify, opts) => {
     method: "GET",
     url: ``,
     schema: {
-      tags: restaurantMembersCRUD.tags,
+      tags: restaurantMenuItemCRUD.tags,
       querystring: paginationDTO,
       response: {
-        200: paginatedDataListResponseDTO(restaurantMembersCRUD.responseDTO),
+        200: paginatedDataListResponseDTO(restaurantMenuItemCRUD.responseDTO),
         ...commonResponses,
       },
     },
-    handler: restaurantMembersCRUD.handleGetAll.bind(restaurantMembersCRUD),
+    handler: restaurantMenuItemCRUD.handleGetAll.bind(restaurantMenuItemCRUD),
   });
 
   fastify.route({
     method: "GET",
     url: `/:id`,
     schema: {
-      tags: restaurantMembersCRUD.tags,
+      tags: restaurantMenuItemCRUD.tags,
       params: z.object({ id: z.string().uuid() }),
       response: {
-        200: dataResponseDTO(restaurantMembersCRUD.responseDTO),
+        200: dataResponseDTO(restaurantMenuItemCRUD.responseDTO),
         ...commonResponses,
       },
     },
-    handler: restaurantMembersCRUD.handleGetOne.bind(restaurantMembersCRUD),
+    handler: restaurantMenuItemCRUD.handleGetOne.bind(restaurantMenuItemCRUD),
   });
 };
 

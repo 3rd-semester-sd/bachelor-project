@@ -19,27 +19,37 @@ const fastify = Fastify({
   logger:
     process.env.NODE_ENV === "DEV"
       ? {
-        level: "info",
-        transport: {
-          target: "pino-pretty", // human-readable logs in development
-        },
-      }
+          level: "info",
+          transport: {
+            target: "pino-pretty", // human-readable logs in development
+          },
+        }
       : true, // default logs for prod
   bodyLimit: 1024 * 1024 * 1024,
 });
 
+// Register Swagger with security scheme
 fastify.register(fastifySwagger, {
   openapi: {
     info: {
       title: "Restaurant API",
-      description: "Resturant API",
+      description: "Restaurant API",
       version: "0.0.1",
     },
     servers: [
       {
-        url: '/restaurant-service'
-      }
+        url: "/restaurant-service",
+      },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT", // Optional, for better documentation
+        },
+      },
+    },
   },
   transform: jsonSchemaTransform,
 });
@@ -70,47 +80,46 @@ fastify.register(fastifySwaggerUI, {
   transformSpecificationClone: true,
 });
 
+// Compiler settings
 fastify.setValidatorCompiler(validatorCompiler);
 fastify.setSerializerCompiler(serializerCompiler);
 
-// This loads all plugins defined in plugins
+// Register plugins
 fastify.register(dbPlugin, {
   databaseUrl: process.env.RESTAURANT_DATABASE_URL!,
 });
-// elastic searcg
 fastify.register(fastifyElasticsearch, {
   node: process.env.RESTAURANT_ES_URL,
 });
-
 fastify.register(fastifyAmqp, {
   hostname: process.env.RESTAURANT_RABBIT_HOSTNAME,
   port: Number(process.env.RESTAURANT_RABBIT_PORT),
   username: process.env.RESTAURANT_RABBIT_USERNAME,
   password: process.env.RESTAURANT_RABBIT_PASSWORD,
 });
-
 fastify.register(rabbitmqPlugin, {
   exchangeName: "new_restaurant_exchange",
   exchangeType: "fanout",
   queueName: "new_restaurant_queue",
   routingKey: "",
 });
-
 fastify.register(rabbitmqPlugin, {
   exchangeName: "embedding_result_exchange",
   exchangeType: "fanout",
   queueName: "restaurant_service_embedding_result",
   routingKey: "",
-  shouldConsume: true
+  shouldConsume: true,
 });
 
-// This loads all plugins defined in routes
-// define your routes in one of these
+// Auto-load routes
 void fastify.register(AutoLoad, {
   dir: join(__dirname, "routes"),
   dirNameRoutePrefix: (folderParent, folderName) => {
-    return `api/${folderName.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase()}`;
+    return `api/${folderName
+      .replace(/([a-z])([A-Z])/g, "$1-$2")
+      .toLowerCase()}`;
   },
-  prefix: "restaurant-service"
+  prefix: "restaurant-service",
 });
+
 export const app = fastify.withTypeProvider<ZodTypeProvider>();

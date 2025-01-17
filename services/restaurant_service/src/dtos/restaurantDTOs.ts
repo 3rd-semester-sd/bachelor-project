@@ -11,7 +11,11 @@ export const restaurantSettingDTO = z.object({
 });
 
 export const restaurantResponseDTO = z.object({
-  member_id: z.string().uuid(),
+  member_id: z
+    .string()
+    .uuid()
+    .nullable()
+    .default("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
   restaurant_id: z.string().uuid(),
   restaurant_name: z.string().max(255),
   restaurant_description: z.string().max(5120),

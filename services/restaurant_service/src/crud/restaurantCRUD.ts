@@ -1,3 +1,4 @@
+// src/crud/restaurantCRUD.ts
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { z } from "zod";
 import { restaurantSettingsTable, restaurantsTable } from "~/db/schema";
@@ -40,7 +41,7 @@ export class RestaurantCRUD extends CRUDBase<
   }
 
   /**
-   * Override handleCreate, to keep everything in one transaction:
+   * Override handleCreate to keep everything in one transaction:
    * - Insert into restaurant_settings
    * - Publish RabbitMQ message
    */
@@ -54,10 +55,11 @@ export class RestaurantCRUD extends CRUDBase<
       // Start transaction
       const result = await this.pgService.transaction(async (tx) => {
         // 1) Insert into main "restaurants" table:
-
         const user_id = req.headers["x-user-id"] as string;
-        console.log(user_id);
-        console.log(req.headers);
+        if (!user_id) {
+          throw new Error("Missing x-user-id header");
+        }
+
         const inserted = await this.pgService.create(
           { member_id: user_id, ...req.body },
           tx
@@ -74,8 +76,14 @@ export class RestaurantCRUD extends CRUDBase<
           tx
         );
 
+        const document = {
+          member_id: user_id,
+          restaurant_id: newRestaurantId,
+          ...req.body,
+        };
+
         // 3) Index in Elasticsearch:
-        await this.esService.create(newRestaurantId, req.body);
+        await this.esService.create(newRestaurantId, document);
 
         // 4) Publish RabbitMQ message:
         const msg = {
@@ -116,12 +124,12 @@ export class RestaurantCRUD extends CRUDBase<
       );
       return res
         .status(500)
-        .send({ error: `something went wrong: ${(e as Error).message}` });
+        .send({ error: `Something went wrong: ${(e as Error).message}` });
     }
   }
-  protected async onAfterDelete(deletedId: string): Promise<void> {
-    // delete menu related to restaurant
 
+  protected async onAfterDelete(deletedId: string): Promise<void> {
+    // Delete menu related to restaurant
     const esResult = await this.fastify.elastic.search({
       index: "restaurant_menu",
       query: {

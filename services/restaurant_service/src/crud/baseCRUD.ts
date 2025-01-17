@@ -1,6 +1,7 @@
+// src/crud/baseCRUD.ts
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { z } from "zod";
-import { paginationDTO } from "~/dtos/requestDTOs";
+import { z, ZodSchema } from "zod";
+import { paginationDTO, PaginationDTO } from "~/dtos/requestDTOs";
 import {
   dataResponseDTO,
   defaultResponseDTO,
@@ -10,8 +11,8 @@ import { AnyPgTable } from "drizzle-orm/pg-core";
 import { PostgresService } from "~/services/pgService";
 import { ElasticsearchService } from "~/services/elasticsearchService";
 
-type ResponseSchema = z.ZodObject<any>;
-type RequestSchema = z.ZodObject<any>;
+type ResponseSchema = ZodSchema<any>;
+type RequestSchema = ZodSchema<any>;
 
 export class CRUDBase<
   M extends AnyPgTable,
@@ -20,16 +21,14 @@ export class CRUDBase<
 > {
   constructor(
     public fastify: FastifyInstance,
-    protected pgService: PostgresService<M>,
-    protected esService: ElasticsearchService<T>,
-    protected idField: string,
-    protected requestDTO: T,
-    protected responseDTO: R,
-    protected tags: string[]
-  ) {
-    this.pgService = pgService; // store the instance
-    this.esService = esService;
-  }
+    public pgService: PostgresService<M>,
+    public esService: ElasticsearchService<T>,
+    public idField: string,
+    public requestDTO: T,
+    public responseDTO: R,
+    public tags: string[]
+  ) {}
+
   /**
    * Hook that runs *after* successfully creating a record in DB.
    * By default, it does nothing. Derived classes can override this.
@@ -41,9 +40,11 @@ export class CRUDBase<
   ): Promise<void> {
     // no-op in base class
   }
+
   protected async onAfterDelete(insertedId: string): Promise<void> {
     // no-op in base class
   }
+
   protected async onAfterUpdate(
     insertedId: string,
     insertedData: Partial<M["$inferInsert"]>,
@@ -51,8 +52,9 @@ export class CRUDBase<
   ): Promise<void> {
     // no-op in base class
   }
+
   async handleGetAll(
-    req: FastifyRequest<{ Querystring: { page: number; page_size: number } }>,
+    req: FastifyRequest<{ Querystring: PaginationDTO }>,
     res: FastifyReply
   ) {
     const { page, page_size: pageSize } = req.query;
@@ -64,9 +66,11 @@ export class CRUDBase<
         offset,
         pageSize
       );
+
       return this.formatPaginatedResponse(esResult, page, pageSize);
     } catch (e) {
-      return res.status(500).send({ error: `something went wrong: ${e}` });
+      this.fastify.log.error(`handleGetAll error: ${e}`);
+      return res.status(500).send({ error: `Something went wrong: ${e}` });
     }
   }
 
@@ -92,7 +96,8 @@ export class CRUDBase<
       }));
       return res.status(200).send({ data: data[0] });
     } catch (e) {
-      return res.status(500).send({ error: `something went wrong: ${e}` });
+      this.fastify.log.error(`handleGetOne error: ${e}`);
+      return res.status(500).send({ error: `Something went wrong: ${e}` });
     }
   }
 
@@ -107,7 +112,7 @@ export class CRUDBase<
         const insertedId = inserted[this.idField];
 
         await this.esService.create(insertedId, req.body);
-        await this.onAfterCreate(insertedId, inserted.id, req);
+        await this.onAfterCreate(insertedId, inserted, req);
 
         return inserted;
       });
@@ -119,7 +124,7 @@ export class CRUDBase<
       );
       return res
         .status(500)
-        .send({ error: `something went wrong: ${(e as Error).message}` });
+        .send({ error: `Something went wrong: ${(e as Error).message}` });
     }
   }
 
@@ -131,7 +136,7 @@ export class CRUDBase<
     const updateData = req.body;
 
     try {
-      await this.pgService.transaction(async (tx) => {
+      const updated = await this.pgService.transaction(async (tx) => {
         const result = await this.pgService.update(
           id,
           updateData as Partial<M["$inferInsert"]>,
@@ -139,17 +144,25 @@ export class CRUDBase<
         );
 
         if (result.length === 0) {
-          return res
-            .status(404)
-            .send({ error: `No ${this.esService.index} found.` });
+          return null;
         }
 
         await this.esService.update(id, updateData);
 
         await this.onAfterUpdate(id, result, req);
+
+        return result;
       });
+
+      if (!updated) {
+        return res
+          .status(404)
+          .send({ error: `No ${this.esService.index} found.` });
+      }
+
       return res.status(200).send({ data: id });
     } catch (e) {
+      this.fastify.log.error(`handleUpdate error: ${e}`);
       return res.status(500).send({ error: `Update failed: ${e}` });
     }
   }
@@ -161,21 +174,29 @@ export class CRUDBase<
     const { id } = req.params;
 
     try {
-      await this.pgService.transaction(async (tx) => {
+      const deleted = await this.pgService.transaction(async (tx) => {
         const result = await this.pgService.delete(id, tx);
 
         if (result.length === 0) {
-          return res
-            .status(404)
-            .send({ error: `No ${this.esService.index} found.` });
+          return null;
         }
 
         await this.esService.delete(id);
 
         await this.onAfterDelete(id);
+
+        return result;
       });
+
+      if (!deleted) {
+        return res
+          .status(404)
+          .send({ error: `No ${this.esService.index} found.` });
+      }
+
       return res.status(200).send({ data: id });
     } catch (e) {
+      this.fastify.log.error(`handleDelete error: ${e}`);
       return res.status(500).send({ error: `Delete failed: ${e}` });
     }
   }
@@ -186,13 +207,15 @@ export class CRUDBase<
     pageSize: number
   ) {
     const hits = esResult.hits.hits;
-    const totalItems = hits.length ?? 0;
+    const totalItems = esResult.hits.total?.value ?? hits.length;
     const totalPages = Math.ceil(totalItems / pageSize);
 
     const data = hits.map((hit: any) => ({
       [this.idField]: hit._id,
       ...hit._source,
     }));
+
+    console.log(data)
 
     return {
       data,
@@ -203,83 +226,5 @@ export class CRUDBase<
         page_size: pageSize,
       },
     };
-  }
-
-  registerRoutes() {
-    const commonResponses = {
-      500: z.object({ error: z.string() }),
-    };
-
-    this.fastify.route({
-      method: "GET",
-      url: "",
-      schema: {
-        tags: this.tags,
-        querystring: paginationDTO,
-        response: {
-          200: paginatedDataListResponseDTO(this.responseDTO),
-          ...commonResponses,
-        },
-      },
-      handler: this.handleGetAll.bind(this),
-    });
-
-    this.fastify.route({
-      method: "GET",
-      url: "/:id",
-      schema: {
-        tags: this.tags,
-        params: z.object({ id: z.string().uuid() }),
-        response: {
-          200: dataResponseDTO(this.responseDTO),
-          ...commonResponses,
-        },
-      },
-      handler: this.handleGetOne.bind(this),
-    });
-
-    this.fastify.route({
-      method: "POST",
-      url: "",
-      schema: {
-        tags: this.tags,
-        body: this.requestDTO,
-        response: {
-          200: defaultResponseDTO,
-          ...commonResponses,
-        },
-      },
-      handler: this.handleCreate.bind(this),
-    });
-
-    this.fastify.route({
-      method: "PATCH",
-      url: "/:id",
-      schema: {
-        tags: this.tags,
-        params: z.object({ id: z.string().uuid() }),
-        body: this.requestDTO.partial(),
-        response: {
-          200: defaultResponseDTO,
-          ...commonResponses,
-        },
-      },
-      handler: this.handleUpdate.bind(this),
-    });
-
-    this.fastify.route({
-      method: "DELETE",
-
-      url: "/:id",
-      schema: {
-        tags: this.tags,
-        params: z.object({ id: z.string().uuid() }),
-        response: {
-          200: defaultResponseDTO,
-          ...commonResponses,
-        },
-      },
-      handler: this.handleDelete.bind(this),
-    });
   }
 }

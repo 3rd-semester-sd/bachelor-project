@@ -6,11 +6,8 @@ from app.api.dtos.dtos import (
 )
 
 from app.settings import settings
-import logging
+from loguru import logger
 from app.services.es.dependencies import ElasticsearchService, GetES
-
-
-logger = logging.getLogger(__name__)
 
 
 async def _generate_embedding(
@@ -19,7 +16,7 @@ async def _generate_embedding(
     model: str,
 ) -> list[float] | None:
     """Generate embedding for a given input string."""
-    
+
     response = await client.embeddings.create(input=[input_str], model=model)
     if response and response.data:
         return response.data[0].embedding

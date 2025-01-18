@@ -7,6 +7,7 @@ from settings import settings
 from uuid import UUID
 from pydantic import BaseModel
 from fastapi import Request
+from loguru import logger
 
 
 async def get_http_client(request: Request) -> AsyncGenerator[AsyncClient, None]:
@@ -89,10 +90,14 @@ class RestaurantClient:
     ) -> RestaurantResponseDTO:
         """Get a restaurant by ID."""
 
+        url = f"{settings.restaurant_service_url}/api/restaurants/api/internal/{restaurant_id}"
+
         response_json = await self._base_request(
             method="GET",
-            url=f"{settings.restaurant_service_url}/api/restaurants/{restaurant_id}",
+            url=url,
         )
+
+        logger.info(url)
 
         if "data" not in response_json:
             raise exceptions.Http500("Invalid response format")

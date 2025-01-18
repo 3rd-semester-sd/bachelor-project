@@ -68,5 +68,3 @@ module "postgres-restaurant" {
   create_replica      = local.restaurant_service_create_replica
   create_database     = local.restaurant_service_create_database
 }
-
-resource "postgresql_exten"

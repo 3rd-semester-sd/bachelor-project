@@ -26,11 +26,6 @@ interface RouteParams {
   user_id: string;
 }
 
-interface ElasticsearchHit {
-  _id: string;
-  _source: Record<string, any>;
-}
-
 export default async function (fastify: FastifyInstance, opts: any) {
   // Initialize services
   const pgService = new PostgresService<typeof restaurantsTable>(

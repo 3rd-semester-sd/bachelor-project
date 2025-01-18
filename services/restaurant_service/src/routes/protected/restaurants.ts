@@ -72,4 +72,5 @@ export default async function (fastify: FastifyInstance, opts: any) {
     },
     handler: restaurantCRUD.handleDelete.bind(restaurantCRUD),
   });
+  
 }

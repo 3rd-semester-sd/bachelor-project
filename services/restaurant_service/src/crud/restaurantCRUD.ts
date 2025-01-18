@@ -9,6 +9,7 @@ import {
 import { CRUDBase } from "./baseCRUD";
 import { PostgresService } from "~/services/pgService";
 import { ElasticsearchService } from "~/services/elasticsearchService";
+import { extractUserId } from "~/utils/auth";
 
 export class RestaurantCRUD extends CRUDBase<
   typeof restaurantsTable,
@@ -54,16 +55,10 @@ export class RestaurantCRUD extends CRUDBase<
 
       // Start transaction
       const result = await this.pgService.transaction(async (tx) => {
-        // 1) Insert into main "restaurants" table:
-        const user_id = req.headers["x-user-id"] as string;
-        if (!user_id) {
-          throw new Error("Missing x-user-id header");
-        }
+        const user_id = extractUserId(req);
 
-        const inserted = await this.pgService.create(
-          { member_id: user_id, ...req.body },
-          tx
-        );
+        // 1) Insert into main "restaurants" table:
+        const inserted = await this.pgService.create({ ...req.body }, tx);
 
         const newRestaurantId = inserted[this.idField];
 

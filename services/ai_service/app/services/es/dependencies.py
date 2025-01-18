@@ -1,15 +1,12 @@
 from typing import Annotated, Any
 from elasticsearch import AsyncElasticsearch
 from fastapi import Depends, Request
-import logging
+from loguru import logger
 
 
 def get_es_client(request: Request) -> AsyncElasticsearch:
     """Get Elasticsearch client from app state."""
     return request.app.state.es
-
-
-logger = logging.getLogger(__name__)
 
 
 class ElasticsearchService:

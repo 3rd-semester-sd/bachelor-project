@@ -1,9 +1,7 @@
-import logging
+from loguru import logger
 from openai import AsyncAzureOpenAI
 from app.api.dtos.dtos import UserPrompt
 from app.settings import settings
-
-logger = logging.getLogger(__name__)
 
 DEFAULT_TEMPERATURE = 0
 

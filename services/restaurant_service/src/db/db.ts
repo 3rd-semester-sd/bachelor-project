@@ -5,9 +5,12 @@ import { migrate } from "drizzle-orm/postgres-js/migrator";
 
 export async function getDbClient(db_url: string) {
   const sql = postgres(db_url, {
-    ssl: {
-      rejectUnauthorized: false,
-    },
+    ssl:
+      process.env.NODE_ENV === "PROD"
+        ? {
+            rejectUnauthorized: false,
+          }
+        : false,
   });
   const db = drizzle(sql, { schema });
 

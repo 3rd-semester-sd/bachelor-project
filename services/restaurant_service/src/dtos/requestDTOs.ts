@@ -12,5 +12,9 @@ export const paginationDTO = z.object({
     .default("10")
     .pipe(z.number().int().positive().max(100)),
 });
+export const searchBodyDTO = z.object({
+  input: z.string(),
+});
 
 export type PaginationDTO = z.infer<typeof paginationDTO>;
+export type SearchBodyDTO = z.infer<typeof searchBodyDTO>;

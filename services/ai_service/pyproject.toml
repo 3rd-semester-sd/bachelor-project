@@ -23,4 +23,5 @@ dependencies = [
     "faker>=33.1.0",
     "elasticsearch-async>=6.2.0",
     "aio-pika>=9.5.4",
+    "loguru>=0.7.3",
 ]

@@ -12,7 +12,6 @@ for tf in [
     "deployment/kubernetes/redis/Tiltfile",
     "deployment/kubernetes/kong/Tiltfile",
     "deployment/kubernetes/elasticsearch/Tiltfile",
-    
 ]:
     if os.path.exists(tf):
         include(tf)

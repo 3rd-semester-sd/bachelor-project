@@ -15,7 +15,7 @@ env:
   restaurant_rabbit_port: 5672
   restaurant_rabbit_username: "user"
   restaurant_rabbit_password: "password"
-  node_env: "DEV"
+  node_env: "PROD"
 resources:
   requests:
     memory: "128Mi"

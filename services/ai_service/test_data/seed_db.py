@@ -36,7 +36,6 @@ class RestaurantPostDTO(BaseModel):
     restaurant_location: str = Field(..., alias="restaurant_location")
     cuisine_type: str = Field(..., alias="cuisine_type")
     restaurant_settings: RestaurantSettings = Field(default=RestaurantSettings())
-    member_id: str
 
 
 def load_restaurants_from_json(file_path: str) -> List[RestaurantInputDTO]:
@@ -62,7 +61,6 @@ def generate_additional_fields() -> dict[str, Any]:
         "restaurant_address": address,
         "restaurant_location": location,
         "cuisine_type": cuisine_type,
-        "member_id": "0969345c-1ac5-4078-83eb-b597ecf04160",
     }
 
 
@@ -72,7 +70,12 @@ def post_restaurant(restaurant_data: RestaurantPostDTO, url: str) -> None:
     Returns True if the request was successful, else False.
     """
     try:
-        response = requests.post(url=url, json=restaurant_data.model_dump())
+        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZmMwMTVhYzEtOGMxZi00MzY1LWE1NzctMDliMDQzNDNjNzk3IiwiZXhwIjoxNzM3MjA2ODY1fQ.5c2d-QGjXXhanKvzcd99Ez9VuXTqRehCQDu6Gyfcaic"
+        response = requests.post(
+            url=url,
+            json=restaurant_data.model_dump(),
+            headers={"Authorization": f"Bearer {token}"},
+        )
         response.raise_for_status()
         print(f"Successfully posted restaurant: {restaurant_data.restaurant_name}")
     except Exception as err:
@@ -85,7 +88,7 @@ def main():
     json_file_path = "./test_data/restaurants.json"
     restaurants = load_restaurants_from_json(json_file_path)
 
-    endpoint_url = "http://57.153.96.127/restaurant-service/api/restaurants"
+    endpoint_url = "http://localhost:8080/restaurant-service/api/protected/restaurants"
 
     for restaurant_input in restaurants:
         # Generate additional fields
@@ -97,7 +100,6 @@ def main():
             restaurant_address=additional_fields["restaurant_address"],
             restaurant_location=additional_fields["restaurant_location"],
             cuisine_type=additional_fields["cuisine_type"],
-            member_id=additional_fields["member_id"],
         )
 
         # Post to the endpoint

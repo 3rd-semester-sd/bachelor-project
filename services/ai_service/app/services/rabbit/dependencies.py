@@ -1,4 +1,3 @@
-import json
 from typing import Annotated
 from aio_pika import DeliveryMode, ExchangeType, IncomingMessage, Message
 from aio_pika import Channel

@@ -90,7 +90,7 @@ class RestaurantClient:
     ) -> RestaurantResponseDTO:
         """Get a restaurant by ID."""
 
-        url = f"{settings.restaurant_service_url}/api/restaurants/api/internal/{restaurant_id}"
+        url = f"{settings.restaurant_service_url}/api/restaurants/{restaurant_id}"
 
         response_json = await self._base_request(
             method="GET",

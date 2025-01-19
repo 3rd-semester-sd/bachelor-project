@@ -16,6 +16,7 @@ module "aks" {
   dnp_name       = local.azurerm_kubernetes_cluster_aks_default_node_pool_name
   dnp_node_count = local.azurerm_kubernetes_cluster_aks_default_node_pool_node_count
   dnp_vm_size    = local.azurerm_kubernetes_cluster_aks_default_node_pool_vm_size
+
 }
 
 module "postgres-auth" {

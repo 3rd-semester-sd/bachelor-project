@@ -10,7 +10,34 @@ resource "azurerm_kubernetes_cluster" "aks" {
     vm_size    = var.dnp_vm_size
   }
 
+
+  oms_agent {
+    log_analytics_workspace_id = azurerm_log_analytics_workspace.aks_logging.id
+  }
+
+
   identity {
     type = "SystemAssigned"
+  }
+}
+
+resource "azurerm_log_analytics_workspace" "aks_logging" {
+  name                = "my-aks-logs-workspace"
+  location            = var.rg_location
+  resource_group_name = var.rg_name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+}
+
+resource "azurerm_log_analytics_solution" "container_insights" {
+  solution_name         = "ContainerInsights"
+  location              = azurerm_log_analytics_workspace.aks_logging.location
+  resource_group_name   = var.rg_name
+  workspace_resource_id = azurerm_log_analytics_workspace.aks_logging.id
+  workspace_name        = azurerm_log_analytics_workspace.aks_logging.name
+
+  plan {
+    publisher = "Microsoft"
+    product   = "OMSGallery/ContainerInsights"
   }
 }

@@ -24,4 +24,6 @@ dependencies = [
     "elasticsearch-async>=6.2.0",
     "aio-pika>=9.5.4",
     "loguru>=0.7.3",
+    "prometheus-fastapi-instrumentator>=7.0.2",
+    "psutil>=6.1.1",
 ]

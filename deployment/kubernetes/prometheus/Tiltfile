@@ -1,0 +1,13 @@
+load("ext://helm_resource", "helm_resource", "helm_repo")
+
+
+helm_resource(
+    name="prometheus",
+    chart="bitnami/prometheus",
+    flags=["--values=./values.yaml"],
+)
+
+# local_resource(
+#     "prometheus-pf",
+#     serve_cmd="kubectl port-forward service/prometheus-server 9090:9090",
+# )

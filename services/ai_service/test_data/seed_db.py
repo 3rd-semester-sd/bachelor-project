@@ -70,7 +70,7 @@ def post_restaurant(restaurant_data: RestaurantPostDTO, url: str) -> None:
     Returns True if the request was successful, else False.
     """
     try:
-        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZmMwMTVhYzEtOGMxZi00MzY1LWE1NzctMDliMDQzNDNjNzk3IiwiZXhwIjoxNzM3MjA2ODY1fQ.5c2d-QGjXXhanKvzcd99Ez9VuXTqRehCQDu6Gyfcaic"
+        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNzM0NzNjMDMtNTY0My00ZjBhLThiMmUtN2NmZTQwNzk1MTE4IiwiZXhwIjoxNzM3MzMxNjkxfQ.XZri6QbPKcFLcofQvAPb8uGEhA2eVecoXvRrgh8xEfw"
         response = requests.post(
             url=url,
             json=restaurant_data.model_dump(),

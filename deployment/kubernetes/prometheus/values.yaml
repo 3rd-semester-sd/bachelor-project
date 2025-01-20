@@ -1,0 +1,7 @@
+server:
+  extraScrapeConfigs: 
+    - job_name: 'fastapi'
+      metrics_path: /ai-service/metrics/
+      scrape_interval: 15s
+      static_configs:
+        - targets: ['ai-service.default.svc.cluster.local:80']

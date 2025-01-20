@@ -16,6 +16,7 @@ from constants import BOOKING_CONFIRMATION_EXPIRE_SECONDS
 from fastapi import BackgroundTasks
 import tasks
 import sqlalchemy as sa
+from loguru import logger
 
 import utils
 
@@ -168,6 +169,8 @@ async def create_booking(
         rmq=rmq,
         restaurant_client=restaurant_client,
     )
+
+    logger.info(f"* TEMPORARY * - Confirmation Code: {confirmation_code}")
 
     return dtos.DefaultCreatedResponse(
         data=dtos.CreatedResponse(id=booking_id),
